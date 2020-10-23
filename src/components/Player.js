@@ -26,17 +26,21 @@ class Player extends React.Component {
       <div className="Player">
         <audio ref={ref => this.player = ref} src={this.props.current.url} muted={this.state.muted}></audio>
 
-        <input type="range" min="0" max={this.state.duration} value={this.state.currentTime} onChange={this.setTime} step="1" />
-        <button onClick={this.toggle}><FontAwesomeIcon icon={faStepBackward} /></button>
-        <button onClick={() => this.props.setPlaying(!this.props.current.playing)}><FontAwesomeIcon icon={playIcon} /></button>
-        <button onClick={this.toggle}><FontAwesomeIcon icon={faStepForward} /></button>
-        <span>{this.props.song.name}</span>
+        <input id="time-scale" type="range" min="0" max={this.state.duration} value={this.state.currentTime} onChange={this.setTime} step="1" />
+        <div id="playback-controls">
+          <button onClick={this.toggle}><FontAwesomeIcon icon={faStepBackward} /></button>
+          <button onClick={() => this.props.setPlaying(!this.props.current.playing)}><FontAwesomeIcon icon={playIcon} /></button>
+          <button onClick={this.toggle}><FontAwesomeIcon icon={faStepForward} /></button>
+        </div>
 
-        <button onClick={() => this.setState((state) => ({muted: !state.muted}))}><FontAwesomeIcon icon={muteIcon} /></button>
-        <input type="range" min="0" max="1" value={this.state.volume} onChange={this.setVolume} step="0.1" title={this.state.volume} />
-        <button disabled><FontAwesomeIcon icon={faTachometerAlt} /></button>
-        <input type="range" min="0.5" max="2" value={this.state.speed} onChange={this.setSpeed} step="0.1" title={this.state.speed} />
-        <span>{this.formatTime(this.state.currentTime)}/{this.formatTime(this.state.duration)}</span>
+        <div id="meta-controls">
+          <button onClick={() => this.setState((state) => ({muted: !state.muted}))}><FontAwesomeIcon icon={muteIcon} /></button>
+          <input type="range" min="0" max="1" value={this.state.volume} onChange={this.setVolume} step="0.1" title={this.state.volume} />
+          <button disabled><FontAwesomeIcon icon={faTachometerAlt} /></button>
+          <input type="range" min="0.5" max="2" value={this.state.speed} onChange={this.setSpeed} step="0.1" title={this.state.speed} />
+        </div>
+        <span id="title-display">{this.props.song.name}</span>
+        <span id="time-display">{this.formatTime(this.state.currentTime)}/{this.formatTime(this.state.duration)}</span>
       </div>
       )
   }
