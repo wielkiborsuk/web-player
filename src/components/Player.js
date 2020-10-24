@@ -99,6 +99,7 @@ class Player extends React.Component {
     this.player.removeEventListener('loadedmetadata', () => {});
     this.player.removeEventListener('play', () => {});
     this.player.removeEventListener('pause', () => {});
+    this.player.removeEventListener('ended', () => {});
   }
 
   setTime(e) {
