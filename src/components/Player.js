@@ -1,4 +1,7 @@
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { play, pause } from '../state/playerSlice';
+import { next, previous } from '../state/playlistSlice';
 import './Player.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faStepBackward, faStepForward, faPlay, faPause, faVolumeUp, faVolumeMute, faTachometerAlt } from '@fortawesome/free-solid-svg-icons'
@@ -19,18 +22,19 @@ class Player extends React.Component {
   }
 
   render() {
-    const playIcon = this.props.current.playing ? faPause : faPlay;
+    const playIcon = this.props.playback.playing ? faPause : faPlay;
+    const playAction = this.props.playback.playing ? pause : play;
     const muteIcon = this.state.muted ? faVolumeMute : faVolumeUp;
 
     return (
       <div className="Player">
-        <audio ref={ref => this.player = ref} src={this.props.current.url} muted={this.state.muted}></audio>
+        <audio ref={ref => this.player = ref} src={this.props.song.url} muted={this.state.muted}></audio>
 
         <input id="time-scale" type="range" min="0" max={this.state.duration} value={this.state.currentTime} onChange={this.setTime} step="1" />
         <div id="playback-controls">
-          <button onClick={this.toggle}><FontAwesomeIcon icon={faStepBackward} /></button>
-          <button onClick={() => this.props.setPlaying(!this.props.current.playing)}><FontAwesomeIcon icon={playIcon} /></button>
-          <button onClick={this.toggle}><FontAwesomeIcon icon={faStepForward} /></button>
+          <button onClick={() => this.props.dispatch(previous())}><FontAwesomeIcon icon={faStepBackward} /></button>
+          <button onClick={() => this.props.dispatch(playAction())}><FontAwesomeIcon icon={playIcon} /></button>
+          <button onClick={() => this.props.dispatch(next())}><FontAwesomeIcon icon={faStepForward} /></button>
         </div>
 
         <div id="meta-controls">
@@ -46,12 +50,12 @@ class Player extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if(this.props.current.url) {
-      if (this.props.current.playing && !prevProps.current.playing) {
+    if(this.props.song.url) {
+      if (this.props.playback.playing && !prevProps.playback.playing) {
         this.player.play();
-      } else if (prevProps.current.playing && !this.props.current.playing) {
+      } else if (prevProps.playback.playing && !this.props.playback.playing) {
         this.player.pause();
-      } else if (this.props.current.url !== prevProps.current.url && this.props.current.playing) {
+      } else if (this.props.song.url !== prevProps.song.url && this.props.playback.playing) {
         this.player.play();
       }
     }
@@ -79,10 +83,14 @@ class Player extends React.Component {
       this.player.playbackRate = this.state.speed;
     });
     this.player.addEventListener('play', e => {
-      this.props.setPlaying(true);
+      this.props.dispatch(play());
     });
     this.player.addEventListener('pause', e => {
-      this.props.setPlaying(false);
+      this.props.dispatch(pause());
+    });
+    this.player.addEventListener('ended', e => {
+      this.props.dispatch(next());
+      this.props.dispatch(play());
     });
   }
 
@@ -123,4 +131,12 @@ class Player extends React.Component {
   }
 }
 
-export default Player;
+export default () => {
+  const dispatch = useDispatch();
+  const song = useSelector(s => s.playlist.song);
+  const playback = useSelector(s => s.player);
+
+  return (
+    <Player dispatch={dispatch} song={song} playback={playback} />
+  );
+}
