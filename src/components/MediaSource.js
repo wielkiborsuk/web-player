@@ -2,6 +2,8 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
 import './MediaSource.css';
+import { Scrollable } from '@vdjurdjevic/material-scrollbars';
+
 
 class MediaSource extends React.Component {
   constructor(props) {
@@ -14,16 +16,25 @@ class MediaSource extends React.Component {
   render() {
     const list_items = this.state.lists.map(item => <li key={item.id} className={this.listElementClass(item)} onClick={() => this.props.dispatch(setCurrentList(item))}>{item.name}</li>);
     const song_items = this.props.selectedList.files && this.props.selectedList.files.map(item => <li key={item.name} className={this.songElementClass(item)} onClick={() => {this.props.dispatch(setCurrentSong(item))}} >{item.name}</li>);
+    const scroll_options = {
+      sizeAutoCapable: 'false'
+    };
+
     return (
       <div className="MediaSource">
-        <ul id="lists">{list_items}</ul>
-        <ul id="songs">{song_items}</ul>
+        <Scrollable options={scroll_options}>
+          <ul id="lists">{list_items}</ul>
+        </Scrollable>
+        <Scrollable options={scroll_options}>
+          <ul id="songs">{song_items}</ul>
+        </Scrollable>
       </div>
       )
   }
 
   componentDidMount() {
-    fetch('http://localhost:5000/file/')
+    const url = this.props.base + '/' + this.props.type + '/';
+    fetch(url)
       .then(res => res.json())
       .then(res => {
         this.setState({lists: res});
@@ -41,12 +52,15 @@ class MediaSource extends React.Component {
   }
 }
 
-export default () => {
+export default (props) => {
   const dispatch = useDispatch();
   const list = useSelector(s => s.playlist.list);
   const song = useSelector(s => s.playlist.song);
-  return (
-    <MediaSource dispatch={dispatch} selectedList={list} selectedSong={song} />
+  if (!props.visible) {
+    return '';
+  }
+  return props.visible && (
+    <MediaSource dispatch={dispatch} selectedList={list} selectedSong={song} {...props} />
   )
 };
 

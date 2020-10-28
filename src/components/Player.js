@@ -3,8 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { play, pause } from '../state/playerSlice';
 import { next, previous } from '../state/playlistSlice';
 import './Player.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faStepBackward, faStepForward, faPlay, faPause, faVolumeUp, faVolumeMute, faTachometerAlt } from '@fortawesome/free-solid-svg-icons'
+import { ButtonGroup, Button, Slider, Box } from '@material-ui/core';
+import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp} from '@material-ui/icons';
 
 class Player extends React.Component {
   constructor(props) {
@@ -22,29 +22,35 @@ class Player extends React.Component {
   }
 
   render() {
-    const playIcon = this.props.playback.playing ? faPause : faPlay;
+    const playIcon = this.props.playback.playing ? <Pause /> : <PlayArrow />;
     const playAction = this.props.playback.playing ? pause : play;
-    const muteIcon = this.state.muted ? faVolumeMute : faVolumeUp;
+    const muteIcon = this.state.muted ? <VolumeOff /> : <VolumeUp />;
 
     return (
       <div className="Player">
         <audio ref={ref => this.player = ref} src={this.props.song.url} muted={this.state.muted}></audio>
 
-        <input id="time-scale" type="range" min="0" max={this.state.duration} value={this.state.currentTime} onChange={this.setTime} step="1" />
-        <div id="playback-controls">
-          <button onClick={() => this.props.dispatch(previous())}><FontAwesomeIcon icon={faStepBackward} /></button>
-          <button onClick={() => this.props.dispatch(playAction())}><FontAwesomeIcon icon={playIcon} /></button>
-          <button onClick={() => this.props.dispatch(next())}><FontAwesomeIcon icon={faStepForward} /></button>
-        </div>
+        <Box id="time-scale">
+          <Slider min={0} max={this.state.duration} value={this.state.currentTime} onChange={this.setTime} step={1} />
+        </Box>
+        <ButtonGroup size="small" id="playback-controls">
+          <Button onClick={() => this.props.dispatch(previous())}><SkipPrevious /></Button>
+          <Button onClick={() => this.props.dispatch(playAction())}>{playIcon}</Button>
+          <Button onClick={() => this.props.dispatch(next())}><SkipNext /></Button>
+        </ButtonGroup>
 
-        <div id="meta-controls">
-          <button onClick={() => this.setState((state) => ({muted: !state.muted}))}><FontAwesomeIcon icon={muteIcon} /></button>
-          <input type="range" min="0" max="1" value={this.state.volume} onChange={this.setVolume} step="0.1" title={this.state.volume} />
-          <button disabled><FontAwesomeIcon icon={faTachometerAlt} /></button>
-          <input type="range" min="0.5" max="2" value={this.state.speed} onChange={this.setSpeed} step="0.1" title={this.state.speed} />
-        </div>
-        <span id="title-display">{this.props.song.name}</span>
-        <span id="time-display">{this.formatTime(this.state.currentTime)}/{this.formatTime(this.state.duration)}</span>
+        <Box id="meta-controls">
+          <Button variant="outlined" size="small" onClick={() => this.setState((state) => ({muted: !state.muted}))}>{muteIcon}</Button>
+          <Box className={'slider-small'}>
+            <Slider min={0} max={1} value={this.state.volume} onChange={this.setVolume} step={0.1} title={this.state.volume} />
+          </Box>
+          <Button variant="outlined" size="small" disabled><Speed /></Button>
+          <Box className={'slider-small'}>
+            <Slider min={0.5} max={2} value={this.state.speed} onChange={this.setSpeed} step={0.1} title={this.state.speed} />
+          </Box>
+        </Box>
+        <p id="title-display">{this.props.song.name}</p>
+        <p id="time-display">{this.formatTime(this.state.currentTime)}/{this.formatTime(this.state.duration)}</p>
       </div>
       )
   }
@@ -102,17 +108,17 @@ class Player extends React.Component {
     this.player.removeEventListener('ended', () => {});
   }
 
-  setTime(e) {
-    this.setState({currentTime: e.target.value});
-    this.player.currentTime = e.target.value;
+  setTime(e, value) {
+    this.setState({currentTime: value});
+    this.player.currentTime = value;
   }
 
-  setVolume(e) {
-    this.setState({volume: e.target.value});
+  setVolume(e, value) {
+    this.setState({volume: value});
   }
 
-  setSpeed(e) {
-    this.setState({speed: e.target.value});
+  setSpeed(e, value) {
+    this.setState({speed: value});
   }
 
   formatTime(time) {
