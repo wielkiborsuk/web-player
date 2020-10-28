@@ -29,7 +29,6 @@ class App extends React.Component {
   }
 
   shouldShow(index) {
-    console.log(index + " - " + this.state.tab);
     return index === this.state.tab;
   }
 }

@@ -17,7 +17,7 @@ class MediaSource extends React.Component {
     const list_items = this.state.lists.map(item => <li key={item.id} className={this.listElementClass(item)} onClick={() => this.props.dispatch(setCurrentList(item))}>{item.name}</li>);
     const song_items = this.props.selectedList.files && this.props.selectedList.files.map(item => <li key={item.name} className={this.songElementClass(item)} onClick={() => {this.props.dispatch(setCurrentSong(item))}} >{item.name}</li>);
     const scroll_options = {
-      sizeAutoCapable: 'false'
+      sizeAutoCapable: false
     };
 
     return (
