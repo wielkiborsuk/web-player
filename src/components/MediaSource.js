@@ -42,12 +42,12 @@ class MediaSource extends React.Component {
   }
 
   listElementClass(list) {
-    const active = this.props.selectedList === list;
+    const active = this.props.selectedList.id === list.id;
     return active ? "active" : "";
   }
 
   songElementClass(song) {
-    const active = this.props.selectedSong === song;
+    const active = this.props.selectedSong.url === song.url;
     return active ? "active": "";
   }
 }
