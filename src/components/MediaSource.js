@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
 import './MediaSource.css';
 import { Scrollable } from '@vdjurdjevic/material-scrollbars';
+import { List, ListItem, ListItemText } from '@material-ui/core';
 
 
 class MediaSource extends React.Component {
@@ -14,16 +15,21 @@ class MediaSource extends React.Component {
   }
 
   render() {
-    const list_items = this.state.lists.map(item => <li key={item.id} className={this.listElementClass(item)} onClick={() => this.props.dispatch(setCurrentList(item))}>{item.name}</li>);
-    const song_items = this.props.selectedList.files && this.props.selectedList.files.map(item => <li key={item.url} className={this.songElementClass(item)} onClick={() => {this.props.dispatch(setCurrentSong(item))}} >{item.name}</li>);
-    const scroll_options = {
-      sizeAutoCapable: false
-    };
+    const list_items = this.state.lists.map(item =>
+      <ListItem button dense={true} key={item.id} selected={this.isListSelected(item)} onClick={() => this.props.dispatch(setCurrentList(item))}>
+        <ListItemText primary={item.name} />
+      </ListItem>);
+    const song_items = this.props.selectedList.files && this.props.selectedList.files.map(item =>
+      <ListItem button dense={true} key={item.url} selected={this.isSongSelected(item)} onClick={() => {this.props.dispatch(setCurrentSong(item))}} >
+        <ListItemText primary={item.name} />
+      </ListItem>);
+
+    const scroll_options = { sizeAutoCapable: false };
 
     return (
       <div className="MediaSource">
         <Scrollable options={scroll_options}>
-          <ul id="lists">{list_items}</ul>
+          <List> {list_items} </List>
         </Scrollable>
         <Scrollable options={scroll_options}>
           <ul id="songs">{song_items}</ul>
@@ -41,14 +47,12 @@ class MediaSource extends React.Component {
       })
   }
 
-  listElementClass(list) {
-    const active = this.props.selectedList.id === list.id;
-    return active ? "active" : "";
+  isListSelected(list) {
+    return this.props.selectedList.id === list.id;
   }
 
-  songElementClass(song) {
-    const active = this.props.selectedSong.url === song.url;
-    return active ? "active": "";
+  isSongSelected(song) {
+    return this.props.selectedSong.url === song.url;
   }
 }
 

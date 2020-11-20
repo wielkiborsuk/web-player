@@ -1,6 +1,4 @@
 html {
-  --hover-element-background: pink;
-  --active-element-background: red;
   height: 100%;
 }
 
@@ -16,23 +14,4 @@ body {
 
 #root {
   height: 100%;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-ul {
-  list-style: none;
-  margin: 0px;
-  padding: 0px;
-}
-
-li:hover {
-  background-color: var(--hover-element-background);
-}
-
-li.active {
-  background-color: var(--active-element-background);
 }
