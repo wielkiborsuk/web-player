@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
+import { setSourceLists } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable } from '@vdjurdjevic/material-scrollbars';
 import { List, ListItem, ListItemText } from '@material-ui/core';
@@ -9,17 +10,15 @@ import { List, ListItem, ListItemText } from '@material-ui/core';
 class MediaSource extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      lists: []
-    }
   }
 
   render() {
-    const list_items = this.state.lists.map(item =>
+    const list_items = this.props.lists.map(item =>
       <ListItem button dense={true} key={item.id} selected={this.isListSelected(item)} onClick={() => this.props.dispatch(setCurrentList(item))}>
         <ListItemText primary={item.name} />
       </ListItem>);
-    const song_items = this.props.selectedList.files && this.props.selectedList.files.map(item =>
+    const show_songs = !!this.props.lists.find(list => list.id == this.props.selectedList.id);
+    const song_items = show_songs && this.props.selectedList.files && this.props.selectedList.files.map(item =>
       <ListItem button dense={true} key={item.url} selected={this.isSongSelected(item)} onClick={() => {this.props.dispatch(setCurrentSong(item))}} >
         <ListItemText primary={item.name} />
       </ListItem>);
@@ -40,11 +39,13 @@ class MediaSource extends React.Component {
 
   componentDidMount() {
     const url = this.props.base;
-    fetch(url)
-      .then(res => res.json())
-      .then(res => {
-        this.setState({lists: res});
-      })
+    if (!this.props.lists) {
+      fetch(url)
+        .then(res => res.json())
+        .then(res => {
+          this.props.dispatch(setSourceLists({base: this.props.base, lists: res}));
+        })
+    }
   }
 
   isListSelected(list) {
