@@ -8,16 +8,13 @@ import { List, ListItem, ListItemText } from '@material-ui/core';
 
 
 class MediaSource extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
-    const list_items = this.props.lists.map(item =>
+    const lists = this.props.lists || [];
+    const list_items = lists.map(item =>
       <ListItem button dense={true} key={item.id} selected={this.isListSelected(item)} onClick={() => this.props.dispatch(setCurrentList(item))}>
         <ListItemText primary={item.name} />
       </ListItem>);
-    const show_songs = !!this.props.lists.find(list => list.id == this.props.selectedList.id);
+    const show_songs = !!this.props.lists.find(list => list.id === this.props.selectedList.id);
     const song_items = show_songs && this.props.selectedList.files && this.props.selectedList.files.map(item =>
       <ListItem button dense={true} key={item.url} selected={this.isSongSelected(item)} onClick={() => {this.props.dispatch(setCurrentSong(item))}} >
         <ListItemText primary={item.name} />

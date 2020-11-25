@@ -16,7 +16,7 @@ const sourcesSlice = createSlice({
       localStorage.setItem('sourcesState', JSON.stringify(state));
     },
     setSourceLists(state, action) {
-      state.sources.find(source => source.base == action.payload.base).lists = action.payload.lists;
+      state.sources.find(source => source.base === action.payload.base).lists = action.payload.lists;
       localStorage.setItem('sourcesState', JSON.stringify(state));
     }
   }
