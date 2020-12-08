@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
-import { setSourceLists } from '../state/sourcesSlice';
+import { fetchSource } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable } from '@vdjurdjevic/material-scrollbars';
 import { List, ListItem, ListItemText } from '@material-ui/core';
@@ -35,13 +35,8 @@ class MediaSource extends React.Component {
   }
 
   componentDidMount() {
-    const url = this.props.base;
     if (!this.props.lists) {
-      fetch(url)
-        .then(res => res.json())
-        .then(res => {
-          this.props.dispatch(setSourceLists({base: this.props.base, lists: res}));
-        })
+      this.props.dispatch(fetchSource());
     }
   }
 

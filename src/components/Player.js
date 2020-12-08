@@ -1,10 +1,11 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { play, pause, setVolume, setSpeed } from '../state/playerSlice';
+import { play, pause, setVolume, setSpeed, saveBookmark, loadBookmark } from '../state/playerSlice';
 import { next, previous, shuffle } from '../state/playlistSlice';
+import { fetchSource } from '../state/sourcesSlice';
 import './Player.css';
 import { ButtonGroup, Button, Slider, Box } from '@material-ui/core';
-import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle} from '@material-ui/icons';
+import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Refresh, Bookmarks, CloudDownload, CloudUpload } from '@material-ui/icons';
 
 class Player extends React.Component {
   constructor(props) {
@@ -25,6 +26,8 @@ class Player extends React.Component {
     const volume = this.props.playback.volume;
     const speed = this.props.playback.speed;
 
+    const dispatch = this.props.dispatch;
+
     return (
       <div className="Player">
         <audio ref={ref => this.player = ref} src={this.props.song.url} muted={this.state.muted}></audio>
@@ -33,21 +36,27 @@ class Player extends React.Component {
           <Slider min={0} max={this.state.duration} value={this.state.currentTime} onChange={this.setTime} step={1} />
         </Box>
         <ButtonGroup size="small" id="playback-controls">
-          <Button onClick={() => this.props.dispatch(previous())}><SkipPrevious /></Button>
-          <Button onClick={() => this.props.dispatch(playAction())}>{playIcon}</Button>
-          <Button onClick={() => this.props.dispatch(next())}><SkipNext /></Button>
-          <Button onClick={() => this.props.dispatch(shuffle())}><Shuffle /></Button>
+          <Button onClick={() => dispatch(previous())}><SkipPrevious /></Button>
+          <Button onClick={() => dispatch(playAction())}>{playIcon}</Button>
+          <Button onClick={() => dispatch(next())}><SkipNext /></Button>
+          <Button onClick={() => dispatch(shuffle())}><Shuffle /></Button>
         </ButtonGroup>
 
         <Box id="meta-controls">
+          <Button variant="outlined" size="small" onClick={() => dispatch(fetchSource())}><Refresh /></Button>
           <Button variant="outlined" size="small" onClick={() => this.setState((state) => ({muted: !state.muted}))}>{muteIcon}</Button>
           <Box className={'slider-small'}>
-            <Slider min={0} max={1} value={volume} onChange={(e, value) => this.props.dispatch(setVolume(value))} step={0.1} title={volume} />
+            <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} title={volume} />
           </Box>
           <Button variant="outlined" size="small" disabled><Speed /></Button>
           <Box className={'slider-small'}>
-            <Slider min={0.5} max={2} value={speed} onChange={(e, value) => this.props.dispatch(setSpeed(value))} step={0.1} title={speed} />
+            <Slider min={0.5} max={2} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.1} title={speed} />
           </Box>
+          <ButtonGroup size="small">
+            <Button><Bookmarks /></Button>
+            <Button><CloudDownload onClick={() => dispatch(saveBookmark())} /></Button>
+            <Button><CloudUpload onClick={() => dispatch(loadBookmark())} /></Button>
+          </ButtonGroup>
         </Box>
         <p id="title-display">{this.props.song.name}</p>
         <p id="time-display">{this.formatTime(this.state.currentTime)}/{this.formatTime(this.state.duration)}</p>
