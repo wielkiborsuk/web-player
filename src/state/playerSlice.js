@@ -1,15 +1,40 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { setCurrentSong } from './playlistSlice';
 
 const initialState = JSON.parse(localStorage.getItem('playerState')) || { playing: false, volume: 1, speed: 1 };
 
 export const saveBookmark = createAsyncThunk('player/saveBookmark', async (payload, { getState }) => {
   console.log('saving bookmark');
+  const list = getState().playlist.list;
+  const song = getState().playlist.song;
+  const bookmark = {
+    id: list.id,
+    name: list.name,
+    file: song.name,
+    time: 0
+  }
   //send bookmark to API
+  if (list.files.find(s => s.name === song.name)) {
+    fetch('http://localhost:5000/bookmark/', {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(bookmark)
+    });
+  }
 });
 
 export const loadBookmark = createAsyncThunk('player/loadBookmark', async (payload, { dispatch, getState }) => {
   console.log('loading bookmark');
+  const list = getState().playlist.list;
   //send bookmark to API
+  fetch('http://localhost:5000/bookmark/' + list.id).then(res => res.json()).then(body => {
+    const song = list.files.find(s => s.name === body.file);
+    dispatch(setCurrentSong(song));
+  }).catch((error) => {
+    console.error('couldnt load the bookmark');
+  });
 });
 
 const playerSlice = createSlice({
