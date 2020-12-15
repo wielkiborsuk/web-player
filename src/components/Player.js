@@ -85,7 +85,6 @@ class Player extends React.Component {
       dispatch(setDuration(e.target.duration || 0));
     });
     this.player.addEventListener('loadedmetadata', e => {
-      dispatch(setCurrentTime(e.target.currentTime || 0));
       dispatch(setDuration(e.target.duration || 0));
       this.player.playbackRate = this.props.playback.speed;
       this.player.volume = this.props.playback.volume;
