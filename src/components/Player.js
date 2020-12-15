@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { play, pause, setVolume, setSpeed, saveBookmark, loadBookmark } from '../state/playerSlice';
+import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, saveBookmark, loadBookmark } from '../state/playerSlice';
 import { next, previous, shuffle } from '../state/playlistSlice';
 import { fetchSource } from '../state/sourcesSlice';
 import './Player.css';
@@ -8,32 +8,23 @@ import { ButtonGroup, Button, Slider, Box } from '@material-ui/core';
 import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Refresh, Bookmarks, CloudDownload, CloudUpload } from '@material-ui/icons';
 
 class Player extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentTime: 0,
-      duration: 0,
-      muted: false
-    };
-    this.setTime = this.setTime.bind(this);
-  }
-
   render() {
-    const playIcon = this.props.playback.playing ? <Pause /> : <PlayArrow />;
-    const playAction = this.props.playback.playing ? pause : play;
-    const muteIcon = this.state.muted ? <VolumeOff /> : <VolumeUp />;
+    const playback = this.props.playback;
+    const playIcon = playback.playing ? <Pause /> : <PlayArrow />;
+    const playAction = playback.playing ? pause : play;
+    const muteIcon = playback.muted ? <VolumeOff /> : <VolumeUp />;
 
-    const volume = this.props.playback.volume;
-    const speed = this.props.playback.speed;
+    const volume = playback.volume;
+    const speed = playback.speed;
 
     const dispatch = this.props.dispatch;
 
     return (
       <div className="Player">
-        <audio ref={ref => this.player = ref} src={this.props.song.url} muted={this.state.muted}></audio>
+        <audio ref={ref => this.player = ref} src={this.props.song.url} muted={playback.muted}></audio>
 
         <Box id="time-scale">
-          <Slider min={0} max={this.state.duration} value={this.state.currentTime} onChange={this.setTime} step={1} />
+          <Slider min={0} max={playback.duration} value={playback.currentTime} onChange={(e, value) => dispatch(setCurrentTime(value))} step={1} />
         </Box>
         <ButtonGroup size="small" id="playback-controls">
           <Button onClick={() => dispatch(previous())}><SkipPrevious /></Button>
@@ -44,7 +35,7 @@ class Player extends React.Component {
 
         <Box id="meta-controls">
           <Button variant="outlined" size="small" onClick={() => dispatch(fetchSource())}><Refresh /></Button>
-          <Button variant="outlined" size="small" onClick={() => this.setState((state) => ({muted: !state.muted}))}>{muteIcon}</Button>
+          <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
           <Box className={'slider-small'}>
             <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} title={volume} />
           </Box>
@@ -59,7 +50,7 @@ class Player extends React.Component {
           </ButtonGroup>
         </Box>
         <p id="title-display">{this.props.song.name}</p>
-        <p id="time-display">{this.formatTime(this.state.currentTime)}/{this.formatTime(this.state.duration)}</p>
+        <p id="time-display">{this.formatTime(playback.currentTime)}/{this.formatTime(playback.duration)}</p>
       </div>
       )
   }
@@ -81,20 +72,21 @@ class Player extends React.Component {
     if (prevProps.playback.volume !== this.props.playback.volume) {
       this.player.volume = this.props.playback.volume;
     }
+    const timeDelta = this.props.playback.currentTime - prevProps.playback.currentTime;
+    if (timeDelta * timeDelta > 4) {
+      this.player.currentTime = this.props.playback.currentTime;
+    }
   }
 
   componentDidMount() {
+    const dispatch = this.props.dispatch;
     this.player.addEventListener('timeupdate', e => {
-      this.setState({
-        currentTime: e.target.currentTime || 0,
-        duration: e.target.duration || 0
-      });
+      dispatch(setCurrentTime(e.target.currentTime || 0));
+      dispatch(setDuration(e.target.duration || 0));
     });
     this.player.addEventListener('loadedmetadata', e => {
-      this.setState({
-        currentTime: e.target.currentTime || 0,
-        duration: e.target.duration || 0
-      });
+      dispatch(setCurrentTime(e.target.currentTime || 0));
+      dispatch(setDuration(e.target.duration || 0));
       this.player.playbackRate = this.props.playback.speed;
       this.player.volume = this.props.playback.volume;
       if (this.props.playback.playing && this.player.paused) {
@@ -119,11 +111,6 @@ class Player extends React.Component {
     this.player.removeEventListener('play', () => {});
     this.player.removeEventListener('pause', () => {});
     this.player.removeEventListener('ended', () => {});
-  }
-
-  setTime(e, value) {
-    this.setState({currentTime: value});
-    this.player.currentTime = value;
   }
 
   formatTime(time) {
