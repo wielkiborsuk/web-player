@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setCurrentSong } from './playlistSlice';
+import { loadState, saveState } from './helpers';
 
-const initialState = JSON.parse(localStorage.getItem('playerState')) || { playing: false, volume: 1, muted: false, currentTime: 0, duration: 0, speed: 1 };
+const initialState = loadState('playerState', { playing: false, volume: 1, muted: false, currentTime: 0, duration: 0, speed: 1 });
 
 export const saveBookmark = createAsyncThunk('player/saveBookmark', async (payload, { getState }) => {
   console.log('saving bookmark');
@@ -45,31 +46,31 @@ const playerSlice = createSlice({
   reducers: {
     play(state) {
       state.playing = true;
-      localStorage.setItem('playerState', JSON.stringify(state));
+      saveState('playerState', state);
     },
     pause(state) {
       state.playing = false;
-      localStorage.setItem('playerState', JSON.stringify(state));
+      saveState('playerState', state);
     },
     setVolume(state, action) {
       state.volume = action.payload;
-      localStorage.setItem('playerState', JSON.stringify(state));
+      saveState('playerState', state);
     },
     setSpeed(state, action) {
       state.speed = action.payload;
-      localStorage.setItem('playerState', JSON.stringify(state));
+      saveState('playerState', state);
     },
     setMuted(state, action) {
       state.muted = action.payload;
-      localStorage.setItem('playerState', JSON.stringify(state));
+      saveState('playerState', state);
     },
     setDuration(state, action) {
       state.duration = action.payload;
-      localStorage.setItem('playerState', JSON.stringify(state));
+      saveState('playerState', state);
     },
     setCurrentTime(state, action) {
       state.currentTime = action.payload;
-      localStorage.setItem('playerState', JSON.stringify(state));
+      saveState('playerState', state);
     }
   }
 });

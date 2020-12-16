@@ -1,6 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { saveState, loadState } from './helpers';
 
-const initialState = JSON.parse(localStorage.getItem('playlistState')) || { list: {}, song: {} };
+const initialState = loadState('playlistState', { list: {}, song: {} });
+
+if (initialState.song.name) {
+  document.title = initialState.song.name;
+}
 
 const playlistSlice = createSlice({
   name: 'playlist',
@@ -8,22 +13,23 @@ const playlistSlice = createSlice({
   reducers: {
     setCurrentList(state, action) {
       state.list = action.payload;
-      localStorage.setItem('playlistState', JSON.stringify(state));
+      saveState('playlistState', state);
     },
     setCurrentSong(state, action) {
       state.song = action.payload;
-      localStorage.setItem('playlistState', JSON.stringify(state));
+      saveState('playlistState', state);
+      document.title = state.song.name;
     },
     next(state) {
       const index = state.list.files.findIndex(item => item.name === state.song.name);
       state.song = state.list.files[(index+1) % state.list.files.length];
-      localStorage.setItem('playlistState', JSON.stringify(state));
+      saveState('playlistState', state);
     },
     previous(state) {
       const listLength = state.list.files.length;
       const index = state.list.files.findIndex(item => item.name === state.song.name);
       state.song = state.list.files[(index+listLength-1) % listLength];
-      localStorage.setItem('playlistState', JSON.stringify(state));
+      saveState('playlistState', state);
     },
     shuffle(state) {
       if (state.list && state.list.files) {

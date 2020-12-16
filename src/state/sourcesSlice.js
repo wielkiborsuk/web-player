@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { saveState, loadState } from './helpers';
 
-const initialState = JSON.parse(localStorage.getItem('sourcesState')) || { sources: [
+const initialState = loadState('sourcesState', { sources: [
         {name: 'files', type: 'file', base: 'http://localhost:5000/file/'},
         {name: 'lists', type: 'list', base: 'http://localhost:5000/list/'},
         {name: 'books', type: 'book', base: 'http://localhost:5000/file/book/'},
         {name: 'podcasts', type: 'book', base: 'http://localhost:5000/list/book/'},
-], current: 0 };
+], current: 0 });
 
 export const fetchSource = createAsyncThunk('sources/fetchSource', async (payload, { getState }) => {
   const base = getState().sources.sources[getState().sources.current].base;
@@ -20,11 +21,11 @@ const sourcesSlice = createSlice({
   reducers: {
     setCurrent(state, action) {
       state.current = action.payload;
-      localStorage.setItem('sourcesState', JSON.stringify(state));
+      saveState('sourcesState', state);
     },
     setSourceLists(state, action) {
       state.sources.find(source => source.base === action.payload.base).lists = action.payload.lists;
-      localStorage.setItem('sourcesState', JSON.stringify(state));
+      saveState('sourcesState', state);
     }
   },
   extraReducers: {
