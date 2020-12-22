@@ -9,12 +9,17 @@ import { List, ListItem, ListItemText } from '@material-ui/core';
 
 export default function MediaSource(props) {
   const dispatch = useDispatch();
-  const selectedList = useSelector(s => s.playlist.list);
+  const selectedListState = useSelector(s => s.playlist.list);
   const selectedSong = useSelector(s => s.playlist.song);
+  const sourcesLists = useSelector(s => s.sources.sources[props.index].lists);
+  const currentSourceIndex = useSelector(s => s.sources.current);
+
+  const selectedList = sourcesLists.find(list => list.id === selectedListState.id) || selectedListState;
+
   const songsScroll = useScrollable();
 
   useEffect(() => {
-    if (!props.lists) {
+    if (!sourcesLists) {
       dispatch(fetchSource());
     }
 
@@ -38,12 +43,12 @@ export default function MediaSource(props) {
     return selectedSong.url === song.url;
   }
 
-  const lists = props.lists || [];
+  const lists = sourcesLists || [];
   const list_items = lists.map(item =>
     <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(setCurrentList(item))}>
       <ListItemText primary={item.name} />
     </ListItem>);
-  const show_songs = !!props.lists.find(list => list.id === selectedList.id);
+  const show_songs = !!sourcesLists.find(list => list.id === selectedList.id);
   const song_items = show_songs && selectedList.files && selectedList.files.map(item =>
     <ListItem button dense={true} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
       <ListItemText primary={item.name} />
@@ -51,7 +56,7 @@ export default function MediaSource(props) {
 
   const scroll_options = { sizeAutoCapable: false };
 
-  return props.visible && (
+  return props.index === currentSourceIndex && (
     <div className="MediaSource">
       <Scrollable options={scroll_options}>
         <List> {list_items} </List>

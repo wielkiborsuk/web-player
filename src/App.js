@@ -10,10 +10,9 @@ export default function App() {
   const dispatch = useDispatch();
   const current = useSelector(s => s.sources.current);
   const sources = useSelector(s => s.sources.sources);
-  const shouldShow = (index) => index === current;
 
   const tabs = sources.map((s) => <Tab key={s.base} label={s.name} />);
-  const contents = sources.map((s, i) => <MediaSource key={s.base} visible={shouldShow(i)} type={s.type} base={s.base} lists={s.lists} />);
+  const contents = sources.map((s, i) => <MediaSource key={s.base} index={i} />);
 
   return (
     <div className="App">
