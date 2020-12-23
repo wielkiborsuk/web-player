@@ -46,7 +46,8 @@ export default function Player(props) {
         player.current.pause();
       }
     }
-  }, [playback.playing, song.url]);
+    dispatch(saveBookmark());
+  }, [playback.playing, song.url, dispatch]);
 
   const timeupdate = (event) => {
       dispatch(setCurrentTime(event.target.currentTime || 0));
