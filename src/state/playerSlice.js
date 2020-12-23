@@ -2,7 +2,16 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setCurrentSong } from './playlistSlice';
 import { loadState, saveState } from './helpers';
 
-const initialState = loadState('playerState', { playing: false, volume: 1, muted: false, currentTime: 0, duration: 0, speed: 1 });
+const initialState = loadState('playerState', {
+  playing: false,
+  volume: 1,
+  muted: false,
+  currentTime: 0,
+  duration: 0,
+  speed: 1,
+  showSpeed: false,
+  showBookmarks: false
+});
 
 export const saveBookmark = createAsyncThunk('player/saveBookmark', async (payload, { getState }) => {
   console.log('saving bookmark');
@@ -71,9 +80,16 @@ const playerSlice = createSlice({
     setCurrentTime(state, action) {
       state.currentTime = action.payload;
       saveState('playerState', state);
+    },
+    toggleShowSpeed(state) {
+      console.log('speed toggle');
+      state.showSpeed = !state.showSpeed;
+    },
+    toggleShowBookmarks(state) {
+      state.showBookmarks = !state.showBookmarks;
     }
   }
 });
 
-export const { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime } = playerSlice.actions;
+export const { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks } = playerSlice.actions;
 export default playerSlice.reducer;

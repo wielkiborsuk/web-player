@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, saveBookmark, loadBookmark } from '../state/playerSlice';
+import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks, saveBookmark, loadBookmark } from '../state/playerSlice';
 import { next, previous, shuffle } from '../state/playlistSlice';
 import { fetchSource } from '../state/sourcesSlice';
 import './Player.css';
@@ -21,6 +21,8 @@ export default function Player(props) {
 
   const volume = playback.volume;
   const speed = playback.speed;
+  const showSpeed = playback.showSpeed;
+  const showBookmarks = playback.showBookmarks;
 
   useEffect(() => {
     const timeDelta = playback.currentTime - prevTime.current;
@@ -84,22 +86,22 @@ export default function Player(props) {
         <Button onClick={() => dispatch(shuffle())}><Shuffle /></Button>
       </ButtonGroup>
 
-      <Box id="meta-controls">
+      <ButtonGroup size="small" id="meta-controls">
         <Button variant="outlined" size="small" onClick={() => dispatch(fetchSource())}><Refresh /></Button>
         <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
-        <Box className={'slider-small'}>
+        <Button className={'slider-small'}>
           <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} title={volume} />
-        </Box>
-        <Button variant="outlined" size="small" disabled><Speed /></Button>
-        <Box className={'slider-small'}>
+        </Button>
+        <Button onClick={() => dispatch(toggleShowSpeed())} variant="outlined" size="small"><Speed /></Button>
+        {showSpeed &&
+        <Button className={'slider-small'}>
           <Slider min={0.5} max={2} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.1} title={speed} />
-        </Box>
-        <ButtonGroup size="small">
-          <Button><Bookmarks /></Button>
-          <Button><CloudDownload onClick={() => dispatch(saveBookmark())} /></Button>
-          <Button><CloudUpload onClick={() => dispatch(loadBookmark())} /></Button>
-        </ButtonGroup>
-      </Box>
+        </Button>
+        }
+        <Button onClick={() => dispatch(toggleShowBookmarks())} ><Bookmarks /></Button>
+        {showBookmarks && <Button onClick={() => dispatch(saveBookmark())}><CloudDownload /></Button>}
+        {showBookmarks && <Button onClick={() => dispatch(loadBookmark())}><CloudUpload /></Button>}
+      </ButtonGroup>
       <p id="title-display">{song.name}</p>
       <p id="time-display">{formatTime(playback.currentTime)}/{formatTime(playback.duration)}</p>
     </div>

@@ -6,9 +6,7 @@
 
 .slider-small {
   width: 120px;
-  display: inline-flex;
-  margin: 0px 10px;
-  vertical-align: middle;;
+  padding: 0px 15px !important;
 }
 
 #time-scale {
@@ -31,6 +29,8 @@
   text-align: right;
   vertical-align: middle;
   padding: 0px;
+  margin: 0px 10px;
+  justify-content: flex-end;
 }
 
 #title-display {
