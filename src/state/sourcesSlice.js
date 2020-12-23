@@ -11,7 +11,8 @@ const initialState = loadState('sourcesState', { sources: [
 export const fetchSource = createAsyncThunk('sources/fetchSource', async (payload, { getState }) => {
   const base = getState().sources.sources[getState().sources.current].base;
   return fetch(base)
-    .then(res => res.json());
+    .then(res => res.json())
+    .then(res => new Promise((resolve, _) => resolve({base: base, lists: res})));
 });
 
 
@@ -30,7 +31,8 @@ const sourcesSlice = createSlice({
   },
   extraReducers: {
     [fetchSource.fulfilled]: (state, action) => {
-      state.sources[state.current].lists = action.payload;
+      const source = state.sources.find(s => s.base === action.payload.base);
+      source.lists = action.payload.lists;
       saveState('sourcesState', state);
     }
   }

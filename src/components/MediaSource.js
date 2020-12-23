@@ -14,17 +14,17 @@ export default function MediaSource(props) {
   const sourcesLists = useSelector(s => s.sources.sources[props.index].lists);
   const currentSourceIndex = useSelector(s => s.sources.current);
 
-  const selectedList = sourcesLists.find(list => list.id === selectedListState.id) || selectedListState;
+  const selectedList = sourcesLists?.find(list => list.id === selectedListState.id) || selectedListState;
 
   const songsScroll = useScrollable();
 
   useEffect(() => {
-    if (!sourcesLists) {
+    if (props.index === currentSourceIndex && !sourcesLists) {
       dispatch(fetchSource());
     }
 
     window.requestAnimationFrame(function() {
-      if (songsScroll && songsScroll.current) {
+      if (songsScroll && songsScroll.current && selectedList && selectedList.files) {
         const song = selectedList.files.find((s) => s.url === selectedSong.url);
 
         if (song) {
@@ -34,6 +34,15 @@ export default function MediaSource(props) {
       }
     });
   });
+
+  useEffect(() => {
+    if (selectedListState.id && sourcesLists) {
+      const foundList = sourcesLists.find(l => l.id === selectedListState.id);
+      if (foundList) {
+        dispatch(setCurrentList(foundList));
+      }
+    }
+  }, [sourcesLists, dispatch, selectedListState.id]);
 
   const isListSelected = (list) => {
     return selectedList.id === list.id;
@@ -48,7 +57,7 @@ export default function MediaSource(props) {
     <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(setCurrentList(item))}>
       <ListItemText primary={item.name} />
     </ListItem>);
-  const show_songs = !!sourcesLists.find(list => list.id === selectedList.id);
+  const show_songs = !!lists.find(list => list.id === selectedList.id);
   const song_items = show_songs && selectedList.files && selectedList.files.map(item =>
     <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
       <ListItemText primary={item.name} />
