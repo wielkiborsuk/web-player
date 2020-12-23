@@ -31,6 +31,7 @@ const sourcesSlice = createSlice({
   extraReducers: {
     [fetchSource.fulfilled]: (state, action) => {
       state.sources[state.current].lists = action.payload;
+      saveState('sourcesState', state);
     }
   }
 });

@@ -26,11 +26,11 @@ export default function MediaSource(props) {
     window.requestAnimationFrame(function() {
       if (songsScroll && songsScroll.current) {
         const song = selectedList.files.find((s) => s.url === selectedSong.url);
-        const index = selectedList.files.indexOf(song);
-        const length = selectedList.files.length;
-        const position = index / length * 100 + "%";
 
-        songsScroll.current.instance().scroll({y: position});
+        if (song) {
+          const el = document.getElementById(song.url);
+          songsScroll.current.instance().scroll({el: el, scroll: "ifneeded", margin: 50});
+        }
       }
     });
   });
@@ -50,7 +50,7 @@ export default function MediaSource(props) {
     </ListItem>);
   const show_songs = !!sourcesLists.find(list => list.id === selectedList.id);
   const song_items = show_songs && selectedList.files && selectedList.files.map(item =>
-    <ListItem button dense={true} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
+    <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
       <ListItemText primary={item.name} />
     </ListItem>);
 

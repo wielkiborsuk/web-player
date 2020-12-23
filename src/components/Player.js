@@ -41,7 +41,7 @@ export default function Player(props) {
   useEffect(() => {
     if (song.url) {
       if (playback.playing) {
-        player.current.play();
+        player.current.play().catch(e => console.log(e));
       } else {
         player.current.pause();
       }
