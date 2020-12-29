@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks, saveBookmark, loadBookmark } from '../state/playerSlice';
 import { next, previous, shuffle } from '../state/playlistSlice';
-import { fetchSource } from '../state/sourcesSlice';
+import { fetchSource, showSettings } from '../state/sourcesSlice';
 import './Player.css';
 import { formatTime } from './helpers';
 import { ButtonGroup, Button, Slider, Box } from '@material-ui/core';
-import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Refresh, Bookmarks, CloudDownload, CloudUpload } from '@material-ui/icons';
+import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Refresh, Bookmarks, CloudDownload, CloudUpload, Settings } from '@material-ui/icons';
 
 export default function Player(props) {
   const dispatch = useDispatch();
@@ -101,6 +101,7 @@ export default function Player(props) {
         <Button onClick={() => dispatch(toggleShowBookmarks())} ><Bookmarks /></Button>
         {showBookmarks && <Button onClick={() => dispatch(saveBookmark())}><CloudDownload /></Button>}
         {showBookmarks && <Button onClick={() => dispatch(loadBookmark())}><CloudUpload /></Button>}
+        <Button onClick={() => dispatch(showSettings())} ><Settings /></Button>
       </ButtonGroup>
       <p id="title-display">{song.name}</p>
       <p id="time-display">{formatTime(playback.currentTime)}/{formatTime(playback.duration)}</p>

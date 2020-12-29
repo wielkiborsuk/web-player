@@ -14,10 +14,10 @@ const initialState = loadState('playerState', {
 });
 
 export const saveBookmark = createAsyncThunk('player/saveBookmark', async (payload, { getState }) => {
-  console.log('saving bookmark');
   const list = getState().playlist.list;
   const song = getState().playlist.song;
   const time = getState().player.currentTime;
+  const bookmarkSource = getState().sources.bookmarkSource || '';
   const bookmark = {
     id: list.id,
     name: list.name,
@@ -25,8 +25,9 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (paylo
     time: time
   }
   //send bookmark to API
-  if (list.files.find(s => s.name === song.name)) {
-    fetch('http://localhost:5000/bookmark/', {
+  if (bookmarkSource && list.files.find(s => s.name === song.name)) {
+    console.log('saving bookmark');
+    fetch(bookmarkSource, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json'
@@ -37,16 +38,19 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (paylo
 });
 
 export const loadBookmark = createAsyncThunk('player/loadBookmark', async (payload, { dispatch, getState }) => {
-  console.log('loading bookmark');
   const list = getState().playlist.list;
+  const bookmarkSource = getState().sources.bookmarkSource || '';
   //send bookmark to API
-  fetch('http://localhost:5000/bookmark/' + list.id).then(res => res.json()).then(body => {
-    const song = list.files.find(s => s.name === body.file);
-    dispatch(setCurrentSong(song));
-    dispatch(setCurrentTime(body.time));
-  }).catch((error) => {
-    console.error('couldnt load the bookmark');
-  });
+  if (bookmarkSource) {
+    console.log('loading bookmark');
+    fetch(bookmarkSource + list.id).then(res => res.json()).then(body => {
+      const song = list.files.find(s => s.name === body.file);
+      dispatch(setCurrentSong(song));
+      dispatch(setCurrentTime(body.time));
+    }).catch((error) => {
+      console.error('couldnt load the bookmark');
+    });
+  }
 });
 
 const playerSlice = createSlice({
@@ -82,7 +86,6 @@ const playerSlice = createSlice({
       saveState('playerState', state);
     },
     toggleShowSpeed(state) {
-      console.log('speed toggle');
       state.showSpeed = !state.showSpeed;
     },
     toggleShowBookmarks(state) {
