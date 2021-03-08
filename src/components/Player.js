@@ -49,7 +49,7 @@ export default function Player(props) {
         player.current.pause();
       }
     }
-    dispatch(saveBookmark());
+    dispatch(saveBookmark(false));
   }, [playback.playing, song.url, dispatch]);
 
   const timeupdate = (event) => {
@@ -101,7 +101,7 @@ export default function Player(props) {
         </Button>
         }
         <Button onClick={() => dispatch(toggleShowBookmarks())} classes={{ root: showBookmarks?"active":""}} ><Bookmarks /></Button>
-        {showBookmarks && <Button onClick={() => dispatch(saveBookmark())}><CloudDownload /></Button>}
+        {showBookmarks && <Button onClick={() => dispatch(saveBookmark(true))}><CloudDownload /></Button>}
         {showBookmarks && <Button onClick={() => dispatch(loadBookmark())}><CloudUpload /></Button>}
         <Button onClick={() => dispatch(showSettings())} ><Settings /></Button>
       </ButtonGroup>

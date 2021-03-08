@@ -10,10 +10,12 @@ const initialState = loadState('playerState', {
   duration: 0,
   speed: 1,
   showSpeed: false,
-  showBookmarks: false
+  showBookmarks: false,
+  bookmarkAlertOpen: false,
+  bookmarkAlertMessage: 'Newer bookmark exists'
 });
 
-export const saveBookmark = createAsyncThunk('player/saveBookmark', async (payload, { getState }) => {
+export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overwrite, { dispatch, getState }) => {
   const list = getState().playlist.list;
   const song = getState().playlist.song;
   const time = getState().player.currentTime;
@@ -26,13 +28,24 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (paylo
   }
   //send bookmark to API
   if (bookmarkSource && list.files.find(s => s.name === song.name)) {
-    console.log('saving bookmark');
-    fetch(bookmarkSource, {
+    const bookmarkUrl = bookmarkSource + (overwrite ? '?overwrite=true' : '')
+    fetch(bookmarkUrl, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(bookmark)
+    }).then((response)=>{
+      if (response.status === 409) {
+        return response.json();
+      }
+    }).then(body => {
+      if (body) {
+        dispatch(setBookmarkAlertMessage('current bookmark in ' + body.file + ' at ' + body.time));
+        dispatch(setBookmarkAlertOpen(true));
+      }
+    }).catch((error) => {
+      console.error('couldnt save bookmark');
     });
   }
 });
@@ -42,7 +55,6 @@ export const loadBookmark = createAsyncThunk('player/loadBookmark', async (paylo
   const bookmarkSource = getState().sources.bookmarkSource || '';
   //send bookmark to API
   if (bookmarkSource) {
-    console.log('loading bookmark');
     fetch(bookmarkSource + list.id).then(res => res.json()).then(body => {
       const song = list.files.find(s => s.name === body.file);
       dispatch(setCurrentSong(song));
@@ -87,12 +99,22 @@ const playerSlice = createSlice({
     },
     toggleShowSpeed(state) {
       state.showSpeed = !state.showSpeed;
+      saveState('playerState', state);
     },
     toggleShowBookmarks(state) {
       state.showBookmarks = !state.showBookmarks;
+      saveState('playerState', state);
+    },
+    setBookmarkAlertMessage(state, action) {
+      state.bookmarkAlertMessage = action.payload;
+      saveState('playerState', state);
+    },
+    setBookmarkAlertOpen(state, action) {
+      state.bookmarkAlertOpen = action.payload;
+      saveState('playerState', state);
     }
   }
 });
 
-export const { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks } = playerSlice.actions;
+export const { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks, setBookmarkAlertMessage, setBookmarkAlertOpen } = playerSlice.actions;
 export default playerSlice.reducer;
