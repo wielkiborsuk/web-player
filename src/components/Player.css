@@ -20,6 +20,10 @@
   min-width: 40px!important;
 }
 
+.MuiButton-root.active {
+  background: #555555;
+}
+
 #playback-controls {
   margin: 0px 10px;
 }
