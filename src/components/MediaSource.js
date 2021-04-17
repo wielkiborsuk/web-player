@@ -58,7 +58,7 @@ export default function MediaSource(props) {
       <ListItemText primary={item.name} />
     </ListItem>);
   const show_songs = !!lists.find(list => list.id === selectedList.id);
-  const song_items = show_songs && selectedList.files && selectedList.files.map(item =>
+  const song_items = show_songs && selectedList.files && selectedListState.files.map(item =>
     <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
       <ListItemText primary={item.name} />
     </ListItem>);

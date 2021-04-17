@@ -19,7 +19,7 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
   const list = getState().playlist.list;
   const song = getState().playlist.song;
   const time = getState().player.currentTime;
-  const bookmarkSource = getState().sources.bookmarkSource || '';
+  const syncSource = getState().sources.syncSource || '';
   const bookmark = {
     id: list.id,
     name: list.name,
@@ -27,8 +27,8 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
     time: time
   }
   //send bookmark to API
-  if (bookmarkSource && list.files.find(s => s.name === song.name)) {
-    const bookmarkUrl = bookmarkSource + (overwrite ? '?overwrite=true' : '')
+  if (syncSource && list.files.find(s => s.name === song.name)) {
+    const bookmarkUrl = syncSource + 'bookmark/' + (overwrite ? '?overwrite=true' : '')
     fetch(bookmarkUrl, {
       method: 'post',
       headers: {
@@ -52,10 +52,10 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
 
 export const loadBookmark = createAsyncThunk('player/loadBookmark', async (payload, { dispatch, getState }) => {
   const list = getState().playlist.list;
-  const bookmarkSource = getState().sources.bookmarkSource || '';
+  const syncSource = getState().sources.syncSource || '';
   //send bookmark to API
-  if (bookmarkSource) {
-    fetch(bookmarkSource + list.id).then(res => res.json()).then(body => {
+  if (syncSource) {
+    fetch(syncSource + 'bookmark/' + list.id).then(res => res.json()).then(body => {
       const song = list.files.find(s => s.name === body.file);
       dispatch(setCurrentSong(song));
       dispatch(setCurrentTime(body.time));

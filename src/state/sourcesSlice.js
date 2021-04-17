@@ -6,13 +6,35 @@ const initialState = loadState('sourcesState', { sources: [
         {id: 2, name: 'lists', type: 'list', base: 'http://localhost:5000/list/'},
         {id: 3, name: 'books', type: 'book', base: 'http://localhost:5000/file/book/'},
         {id: 4, name: 'podcasts', type: 'book', base: 'http://localhost:5000/list/book/'},
-], bookmarkSource: 'http://localhost:5000/bookmark/', current: 0, showSettings: false });
+], syncSource: 'http://localhost:5000/', syncKey: 'config', current: 0, showSettings: false });
 
 export const fetchSource = createAsyncThunk('sources/fetchSource', async (payload, { getState }) => {
   const source = getState().sources.sources[getState().sources.current];
   return fetch(source.base)
     .then(res => res.json())
     .then(res => new Promise((resolve, _) => resolve({id: source.id, lists: res})));
+});
+
+export const saveConfig = createAsyncThunk('sources/saveConfig', async (payload, { getState }) => {
+  const syncSource = getState().sources.syncSource;
+  const syncKey = getState().sources.syncKey;
+  const sources = getState().sources.sources.map(s => ({...s, lists: null}))
+  return fetch(syncSource + 'config/',{
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({id: syncKey, sources: sources, settings: {}, timestamp: Date.now()})
+  }).then(res => res.json());
+});
+
+export const loadConfig = createAsyncThunk('sources/loadConfig', async (payload, { getState }) => {
+  const syncSource = getState().sources.syncSource;
+  const syncKey = getState().sources.syncKey;
+  if (syncSource) {
+    return fetch(syncSource + 'config/' + syncKey)
+      .then(res => res.json());
+  }
 });
 
 
@@ -32,8 +54,12 @@ const sourcesSlice = createSlice({
       state.sources = action.payload;
       saveState('sourcesState', state);
     },
-    setBookmarkSource(state, action) {
-      state.bookmarkSource = action.payload;
+    setSyncSource(state, action) {
+      state.syncSource = action.payload;
+      saveState('sourcesState', state);
+    },
+    setSyncKey(state, action) {
+      state.syncKey = action.payload;
       saveState('sourcesState', state);
     },
     showSettings(state) {
@@ -50,9 +76,14 @@ const sourcesSlice = createSlice({
       const source = state.sources.find(s => s.id === action.payload.id);
       source.lists = action.payload.lists;
       saveState('sourcesState', state);
+    },
+    [loadConfig.fulfilled]: (state, action) => {
+      const sources = action.payload.sources;
+      state.sources = sources;
+      saveState('sourcesState', state);
     }
   }
 });
 
-export const { setCurrent, setSourceLists, setSources, setBookmarkSource, showSettings, hideSettings } = sourcesSlice.actions;
+export const { setCurrent, setSourceLists, setSources, setSyncSource, setSyncKey, showSettings, hideSettings } = sourcesSlice.actions;
 export default sourcesSlice.reducer;
