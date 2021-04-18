@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Player from './components/Player.js';
 import MediaSource from './components/MediaSource.js';
 import Settings from './components/Settings';
-import { setBookmarkAlertOpen } from './state/playerSlice';
+import { setBookmarkAlertOpen } from './state/bookmarkSlice';
 import { AppBar, Tabs, Tab, ThemeProvider, Snackbar, createMuiTheme } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { setCurrent } from './state/sourcesSlice';

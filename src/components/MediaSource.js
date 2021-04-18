@@ -4,7 +4,7 @@ import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
 import { fetchSource } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable, useScrollable } from '@vdjurdjevic/material-scrollbars';
-import { List, ListItem, ListItemText } from '@material-ui/core';
+import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@material-ui/core';
 
 
 export default function MediaSource(props) {
@@ -13,6 +13,7 @@ export default function MediaSource(props) {
   const selectedSong = useSelector(s => s.playlist.song);
   const sourcesLists = useSelector(s => s.sources.sources[props.index].lists);
   const currentSourceIndex = useSelector(s => s.sources.current);
+  const bookmarks = useSelector(s => s.bookmark.bookmarks);
 
   const selectedList = sourcesLists?.find(list => list.id === selectedListState.id) || selectedListState;
 
@@ -52,15 +53,32 @@ export default function MediaSource(props) {
     return selectedSong.url === song.url;
   }
 
+  const newSongCount = (list, bookmarks) => {
+    const mark = bookmarks[list.id];
+    if (mark) {
+      const idx = list.files.findIndex(s => s.name === mark.file);
+      return list.files.length - idx - 1;
+    }
+    return 0;
+  }
+
   const lists = sourcesLists || [];
   const list_items = lists.map(item =>
     <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(setCurrentList(item))}>
       <ListItemText primary={item.name} />
+      <ListItemSecondaryAction>
+        <Badge anchorOrigin={{horizontal: 'left', vertical: 'top'}} badgeContent={newSongCount(item, bookmarks)} color="primary">
+          &nbsp; &nbsp;
+        </Badge>
+      </ListItemSecondaryAction>
     </ListItem>);
   const show_songs = !!lists.find(list => list.id === selectedList.id);
-  const song_items = show_songs && selectedList.files && selectedListState.files.map(item =>
+  const markIndex = selectedList.files.length - 1 - newSongCount(selectedList, bookmarks);
+  const song_items = show_songs && selectedList.files && selectedListState.files.map((item, index) =>
     <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
-      <ListItemText primary={item.name} />
+      <Badge variant="dot" anchorOrigin={{horizontal: 'left', vertical: 'top'}} badgeContent={Math.max(index-markIndex, 0)} color="primary">
+        <ListItemText primary={item.name} />
+      </Badge>
     </ListItem>);
 
   const scroll_options = { sizeAutoCapable: false };

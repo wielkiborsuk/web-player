@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks, saveBookmark, loadBookmark } from '../state/playerSlice';
+import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks } from '../state/playerSlice';
+import { saveBookmark, loadBookmark, loadBookmarks } from '../state/bookmarkSlice';
 import { next, previous, shuffle, toggleRepeat } from '../state/playlistSlice';
 import { fetchSource, showSettings } from '../state/sourcesSlice';
 import './Player.css';
@@ -89,7 +90,7 @@ export default function Player(props) {
       </ButtonGroup>
 
       <ButtonGroup size="small" id="meta-controls">
-        <Button variant="outlined" size="small" onClick={() => dispatch(fetchSource())}><Refresh /></Button>
+        <Button variant="outlined" size="small" onClick={() => { dispatch(fetchSource()); dispatch(loadBookmarks()) }}><Refresh /></Button>
         <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
         <Button className={'slider-small'}>
           <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} title={volume} />
