@@ -54,7 +54,7 @@ export default function MediaSource(props) {
   }
 
   const newSongCount = (list, bookmarks) => {
-    const mark = bookmarks[list.id];
+    const mark = list.is_book ? bookmarks[list.id] : null;
     if (mark) {
       const idx = list.files.findIndex(s => s.name === mark.file);
       return list.files.length - idx - 1;

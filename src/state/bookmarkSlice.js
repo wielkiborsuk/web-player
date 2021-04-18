@@ -40,6 +40,8 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
       }
     }).catch((error) => {
       console.error('couldnt save bookmark');
+    }).finally(() => {
+      dispatch(loadBookmarks());
     });
   }
 });
