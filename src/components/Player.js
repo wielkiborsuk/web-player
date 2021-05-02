@@ -43,15 +43,17 @@ export default function Player(props) {
   }, [playback.volume]);
 
   useEffect(() => {
-    if (song.url) {
-      if (playback.playing) {
-        player.current.play().catch(e => console.log(e));
-      } else {
-        player.current.pause();
-      }
+    if (playback.playing) {
+      player.current.play().catch(e => console.log(e));
+    } else {
+      player.current.pause();
     }
     dispatch(saveBookmark(false));
-  }, [playback.playing, song.url, dispatch]);
+  }, [playback.playing, dispatch]);
+
+  useEffect(() => {
+    dispatch(play());
+  }, [song.url, dispatch]);
 
   const timeupdate = (event) => {
       dispatch(setCurrentTime(event.target.currentTime || 0));
@@ -72,9 +74,10 @@ export default function Player(props) {
         muted={playback.muted}
         onPlay={() => dispatch(play())}
         onPause={() => dispatch(pause())}
-        onEnded={() => { dispatch(next()); dispatch(play()) }}
+        onEnded={() => dispatch(next())}
         onTimeUpdate={timeupdate}
         onLoadedMetadata={playerInit}
+        autoPlay
       >
       </audio>
 
