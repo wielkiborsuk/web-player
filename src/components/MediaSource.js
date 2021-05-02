@@ -73,7 +73,7 @@ export default function MediaSource(props) {
       </ListItemSecondaryAction>
     </ListItem>);
   const show_songs = !!lists.find(list => list.id === selectedList.id);
-  const markIndex = selectedList.files.length - 1 - newSongCount(selectedList, bookmarks);
+  const markIndex = (selectedList?.files?.length || 0) - 1 - newSongCount(selectedList, bookmarks);
   const song_items = show_songs && selectedList.files && selectedListState.files.map((item, index) =>
     <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
       <Badge variant="dot" anchorOrigin={{horizontal: 'left', vertical: 'top'}} badgeContent={Math.max(index-markIndex, 0)} color="primary">
