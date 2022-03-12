@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
+import { setCurrentSong, setCurrentList, next, previous } from '../state/playlistSlice';
 import { fetchSource } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable, useScrollable } from 'nice-scrollbars';
@@ -44,6 +44,11 @@ export default function MediaSource(props) {
       }
     }
   }, [sourcesLists, dispatch, selectedListState.id]);
+
+  useEffect(() => {
+    navigator.mediaSession.setActionHandler('nexttrack', () => dispatch(next()));
+    navigator.mediaSession.setActionHandler('previoustrack', () => dispatch(previous()));
+  }, [dispatch]);
 
   const isListSelected = (list) => {
     return selectedList.id === list.id;
