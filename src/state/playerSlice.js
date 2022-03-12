@@ -11,6 +11,7 @@ const initialState = loadState('playerState', {
   showSpeed: false,
   showBookmarks: false
 });
+initialState.playing = false;
 
 const playerSlice = createSlice({
   name: 'player',
