@@ -5,7 +5,7 @@ import Player from './components/Player.js';
 import MediaSource from './components/MediaSource.js';
 import Settings from './components/Settings';
 import { setBookmarkAlertOpen } from './state/bookmarkSlice';
-import { AppBar, Tabs, Tab, ThemeProvider, Snackbar, createMuiTheme } from '@material-ui/core';
+import { AppBar, Tabs, Tab, ThemeProvider, Snackbar, createTheme } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { setCurrent } from './state/sourcesSlice';
 
@@ -19,7 +19,7 @@ export default function App() {
   const tabs = sources.map((s) => <Tab key={s.id} label={s.name} />);
   const contents = sources.map((s, i) => <MediaSource key={s.id} index={i} />);
 
-  const muiTheme = createMuiTheme({
+  const theme = createTheme({
     palette: {
       //primary: {
         //main: '#9c27b0'
@@ -31,7 +31,7 @@ export default function App() {
   });
 
   return (
-    <ThemeProvider theme={muiTheme}>
+    <ThemeProvider theme={theme}>
       <div className="App">
         <Player />
         {contents}

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
 import { fetchSource } from '../state/sourcesSlice';
 import './MediaSource.css';
-import { Scrollable, useScrollable } from '@vdjurdjevic/material-scrollbars';
+import { Scrollable, useScrollable } from 'nice-scrollbars';
 import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@material-ui/core';
 
 
