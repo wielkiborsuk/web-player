@@ -51,6 +51,14 @@ export default function Player(props) {
     dispatch(saveBookmark(false));
   }, [playback.playing, song.url, dispatch]);
 
+  useEffect(() => {
+    navigator.mediaSession.setActionHandler('nexttrack', () => dispatch(next()));
+    navigator.mediaSession.setActionHandler('previoustrack', () => dispatch(previous()));
+    navigator.mediaSession.setActionHandler('play', () => dispatch(play()));
+    navigator.mediaSession.setActionHandler('pause', () => dispatch(pause()));
+  }, [dispatch]);
+
+
   const timeupdate = (event) => {
       dispatch(setCurrentTime(event.target.currentTime || 0));
       dispatch(setDuration(event.target.duration || 0));
