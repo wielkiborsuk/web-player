@@ -3,6 +3,14 @@
   grid-template-columns: minmax(0, 25%) 75%;
 }
 
+span.badge-center {
+  transform: scale(1) translate(+30%, 0%);
+}
+
+span.dot-center {
+  transform: scale(1) translate(-100%, +60%);
+}
+
 ul#lists li, ul#songs li {
   overflow: hidden;
   text-overflow: ellipsis;

@@ -67,8 +67,8 @@ export default function MediaSource(props) {
     <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(setCurrentList(item))}>
       <ListItemText primary={item.name} />
       <ListItemSecondaryAction>
-        <Badge anchorOrigin={{horizontal: 'left', vertical: 'top'}} badgeContent={newSongCount(item, bookmarks)} color="primary">
-          &nbsp; &nbsp;
+        <Badge classes={{badge: 'badge-center'}} badgeContent={newSongCount(item, bookmarks)} color="primary">
+          &nbsp;
         </Badge>
       </ListItemSecondaryAction>
     </ListItem>);
@@ -76,9 +76,10 @@ export default function MediaSource(props) {
   const markIndex = (selectedList?.files?.length || 0) - 1 - newSongCount(selectedList, bookmarks);
   const song_items = show_songs && selectedList.files && selectedListState.files.map((item, index) =>
     <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
-      <Badge variant="dot" anchorOrigin={{horizontal: 'left', vertical: 'top'}} badgeContent={Math.max(index-markIndex, 0)} color="primary">
-        <ListItemText primary={item.name} />
+      <Badge variant="dot" anchorOrigin={{vertical: 'top', horizontal: 'left'}} classes={{badge: 'dot-center'}} badgeContent={Math.max(index-markIndex, 0)} color="primary">
+        &nbsp;
       </Badge>
+      <ListItemText primary={item.name} />
     </ListItem>);
 
   const scroll_options = { sizeAutoCapable: false };
