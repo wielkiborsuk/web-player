@@ -76,9 +76,7 @@ export default function Player(props) {
         ref={player}
         src={song.url}
         muted={playback.muted}
-        onPlay={() => dispatch(play())}
-        onPause={() => dispatch(pause())}
-        onEnded={() => { dispatch(next()); dispatch(play()); }}
+        onEnded={() => dispatch(next())}
         onTimeUpdate={timeupdate}
         onLoadedMetadata={playerInit}
       >
