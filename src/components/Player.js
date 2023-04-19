@@ -48,7 +48,6 @@ export default function Player(props) {
     } else {
       player.current.pause();
     }
-    dispatch(saveBookmark(false));
   }, [playback.playing, song.url, dispatch]);
 
   useEffect(() => {
@@ -79,6 +78,8 @@ export default function Player(props) {
         onEnded={() => dispatch(next())}
         onTimeUpdate={timeupdate}
         onLoadedMetadata={playerInit}
+        onPlay={() => dispatch(saveBookmark(false))}
+        onPause={() => dispatch(saveBookmark(false))}
       >
       </audio>
 
