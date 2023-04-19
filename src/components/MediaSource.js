@@ -25,8 +25,12 @@ export default function MediaSource(props) {
     }
 
     window.requestAnimationFrame(function() {
-      if (songsScroll && songsScroll.current && selectedList && selectedList.files) {
-        const song = selectedList.files.find((s) => s.url === selectedSong.url);
+      if (songsScroll &&  songsScroll.current && selectedList && selectedList.files) {
+        let song = selectedList.files.find((s) => s.url === selectedSong.url);
+
+        if (!song) {
+          song = selectedList.files[bookmarkIndex(selectedList, bookmarks)];
+        }
 
         if (song) {
           const el = document.getElementById(song.url);
@@ -60,6 +64,14 @@ export default function MediaSource(props) {
       return list.files.length - idx - 1;
     }
     return 0;
+  }
+
+  const bookmarkIndex = (list, bookmarks) => {
+    const mark = list.is_book ? bookmarks[list.id] : null;
+    if (mark) {
+      return list.files.findIndex(s => s.name === mark.file);
+    }
+    return -1;
   }
 
   const lists = sourcesLists || [];
