@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
+import { play } from '../state/playerSlice';
 import { fetchSource } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable, useScrollable } from 'nice-scrollbars';
@@ -87,7 +88,7 @@ export default function MediaSource(props) {
   const show_songs = !!lists.find(list => list.id === selectedList.id);
   const markIndex = (selectedList?.files?.length || 0) - 1 - newSongCount(selectedList, bookmarks);
   const song_items = show_songs && selectedList.files && selectedListState.files.map((item, index) =>
-    <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item))}} >
+    <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item)); dispatch(play());}} >
       <Badge variant="dot" anchorOrigin={{vertical: 'top', horizontal: 'left'}} classes={{badge: 'dot-center'}} badgeContent={Math.max(index-markIndex, 0)} color="primary">
         &nbsp;
       </Badge>

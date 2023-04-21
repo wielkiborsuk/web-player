@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setCurrentSong } from './playlistSlice';
-import { setCurrentTime, toggleShowBookmarks } from './playerSlice';
+import { play, setCurrentTime, toggleShowBookmarks } from './playerSlice';
 import { loadState, saveState } from './helpers';
 
 const initialState = loadState('bookmarkState', {
@@ -55,6 +55,7 @@ export const loadBookmark = createAsyncThunk('player/loadBookmark', async (paylo
       const song = list.files.find(s => s.name === body.file);
       dispatch(setCurrentSong(song));
       dispatch(setCurrentTime(body.time));
+      dispatch(play());
     }).catch((error) => {
       console.error('couldnt load the bookmark');
     });
