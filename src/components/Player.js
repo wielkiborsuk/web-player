@@ -6,12 +6,13 @@ import { next, previous, shuffle, toggleRepeat } from '../state/playlistSlice';
 import { fetchSource, showSettings } from '../state/sourcesSlice';
 import './Player.css';
 import { formatTime } from './helpers';
-import { ButtonGroup, Button, Slider, Box } from '@material-ui/core';
+import { ButtonGroup, Button, Slider, Box, Tooltip } from '@material-ui/core';
 import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Repeat, Refresh, Bookmarks, CloudDownload, CloudUpload, Settings } from '@material-ui/icons';
 
 export default function Player(props) {
   const dispatch = useDispatch();
   const song = useSelector(s => s.playlist.song);
+  const bookmark = useSelector(s => { return s.bookmark.bookmarks[s.playlist.list.id]; });
   const playback = useSelector(s => s.player);
   const repeat = useSelector(s => s.playlist.repeat) || false;
   const player = useRef();
@@ -106,9 +107,13 @@ export default function Player(props) {
           <Slider min={0.5} max={2} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.1} title={speed} />
         </Button>
         }
-        <Button onClick={() => dispatch(toggleShowBookmarks())} classes={{ root: showBookmarks?"active":""}} ><Bookmarks /></Button>
-        {showBookmarks && <Button onClick={() => dispatch(saveBookmark(true))}><CloudDownload /></Button>}
-        {showBookmarks && <Button onClick={() => dispatch(loadBookmark())}><CloudUpload /></Button>}
+        <Tooltip title={bookmark.file + ' ' +formatTime(bookmark.time)} >
+          <Button onClick={() => dispatch(toggleShowBookmarks())} classes={{ root: showBookmarks?"active":""}} >
+            <Bookmarks />
+          </Button>
+        </Tooltip>
+        {showBookmarks && <Button onClick={() => {dispatch(saveBookmark(true)); dispatch(toggleShowBookmarks());}}><CloudDownload /></Button>}
+        {showBookmarks && <Button onClick={() => {dispatch(loadBookmark()); dispatch(toggleShowBookmarks());}}><CloudUpload /></Button>}
         <Button onClick={() => dispatch(showSettings())} ><Settings /></Button>
       </ButtonGroup>
       <p id="title-display">{song.name}</p>
