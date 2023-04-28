@@ -6,7 +6,7 @@ import { next, previous, shuffle, toggleRepeat } from '../state/playlistSlice';
 import { fetchSource, showSettings } from '../state/sourcesSlice';
 import './Player.css';
 import { formatTime } from './helpers';
-import { ButtonGroup, Button, Slider, Box, Tooltip } from '@material-ui/core';
+import { ButtonGroup, Button, Slider, Box, Tooltip, Badge } from '@material-ui/core';
 import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Repeat, Refresh, Bookmarks, CloudDownload, CloudUpload, Settings } from '@material-ui/icons';
 
 export default function Player(props) {
@@ -101,10 +101,14 @@ export default function Player(props) {
         <Button className={'slider-small'}>
           <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} title={volume} />
         </Button>
-        <Button onClick={() => dispatch(toggleShowSpeed())} classes={{ root: showSpeed?"active":""}}><Speed /></Button>
+        <Button onClick={() => dispatch(toggleShowSpeed())} classes={{ root: showSpeed?"active":""}}>
+          <Badge id="speed-label" badgeContent={speed} overlap={"circular"} color={'primary'} invisible={speed === 1}>
+            <Speed />
+          </Badge>
+        </Button>
         {showSpeed &&
         <Button className={'slider-small'}>
-          <Slider min={0.5} max={2} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.1} title={speed} />
+          <Slider min={0.75} max={1.5} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.25} title={speed} />
         </Button>
         }
         <Tooltip title={bookmark.file + ' ' +formatTime(bookmark.time)} >

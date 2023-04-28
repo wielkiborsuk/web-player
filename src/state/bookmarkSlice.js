@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setCurrentSong } from './playlistSlice';
-import { play, setCurrentTime, toggleShowBookmarks } from './playerSlice';
+import { play, setCurrentTime } from './playerSlice';
 import { loadState, saveState } from './helpers';
 
 const initialState = loadState('bookmarkState', {

@@ -16,6 +16,10 @@
   vertical-align: middle;;
 }
 
+#speed-label .MuiBadge-badge:not(.MuiBadge-invisible) {
+  transform: scale(0.7) translate(50%, -50%);
+}
+
 .MuiButton-root {
   min-width: 40px!important;
 }
