@@ -70,6 +70,13 @@ export default function Player(props) {
       player.current.volume = playback.volume;
   }
 
+  let timeMarks = [];
+  if (showBookmarks) {
+    if (bookmark.file === song.name) {
+      timeMarks.push( {value:bookmark.time, label:(<span style={{color: 'purple'}} title="bookmark"><Bookmarks/></span>)} );
+    }
+  }
+
   return (
     <div className="Player">
       <audio
@@ -85,7 +92,7 @@ export default function Player(props) {
       </audio>
 
       <Box id="time-scale">
-        <Slider min={0} max={playback.duration} value={playback.currentTime} onChange={(e, value) => dispatch(setCurrentTime(value))} step={1} />
+        <Slider min={0} max={playback.duration} value={playback.currentTime} onChange={(e, value) => dispatch(setCurrentTime(value))} step={1} marks={timeMarks} />
       </Box>
       <ButtonGroup size="small" id="playback-controls">
         <Button onClick={() => dispatch(previous())}><SkipPrevious /></Button>
@@ -99,7 +106,7 @@ export default function Player(props) {
         <Button variant="outlined" size="small" onClick={() => { dispatch(fetchSource()); dispatch(loadBookmarks()) }}><Refresh /></Button>
         <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
         <Button className={'slider-small'}>
-          <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} title={volume} />
+          <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} />
         </Button>
         <Button onClick={() => dispatch(toggleShowSpeed())} classes={{ root: showSpeed?"active":""}}>
           <Badge id="speed-label" badgeContent={speed} overlap={"circular"} color={'primary'} invisible={speed === 1}>
@@ -108,7 +115,7 @@ export default function Player(props) {
         </Button>
         {showSpeed &&
         <Button className={'slider-small'}>
-          <Slider min={0.75} max={1.5} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.25} title={speed} />
+          <Slider min={0.75} max={1.5} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.25} marks={true} />
         </Button>
         }
         <Tooltip title={bookmark.file + ' ' +formatTime(bookmark.time)} >
