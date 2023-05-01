@@ -89,7 +89,7 @@ export default function MediaSource(props) {
   const markIndex = (selectedList?.files?.length || 0) - 1 - newSongCount(selectedList, bookmarks);
   const song_items = show_songs && selectedList.files && selectedListState.files.map((item, index) =>
     <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item)); dispatch(play());}} >
-      <Badge variant="dot" anchorOrigin={{vertical: 'top', horizontal: 'left'}} classes={{badge: 'dot-center'}} badgeContent={Math.max(index-markIndex, 0)} color="primary">
+      <Badge variant="dot" anchorOrigin={{vertical: 'top', horizontal: 'left'}} classes={{badge: 'dot-center'}} badgeContent={index-markIndex} invisible={index < markIndex} color={index > markIndex ? "primary" : "secondary"}>
         &nbsp;
       </Badge>
       <ListItemText primary={item.name} />
