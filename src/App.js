@@ -13,8 +13,8 @@ export default function App() {
   const dispatch = useDispatch();
   const current = useSelector(s => s.sources.current);
   const sources = useSelector(s => s.sources.sources);
-  const bookmarkAlertOpen = useSelector(s => s.player.bookmarkAlertOpen);
-  const bookmarkAlertMessage = useSelector(s => s.player.bookmarkAlertMessage);
+  const bookmarkAlertOpen = useSelector(s => s.bookmark.bookmarkAlertOpen);
+  const bookmarkAlertMessage = useSelector(s => s.bookmark.bookmarkAlertMessage);
 
   const tabs = sources.map((s) => <Tab key={s.id} label={s.name} />);
   const contents = sources.map((s, i) => <MediaSource key={s.id} index={i} />);

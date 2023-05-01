@@ -6,12 +6,13 @@ import { next, previous, shuffle, toggleRepeat } from '../state/playlistSlice';
 import { fetchSource, showSettings } from '../state/sourcesSlice';
 import './Player.css';
 import { formatTime } from './helpers';
-import { ButtonGroup, Button, Slider, Box } from '@material-ui/core';
+import { ButtonGroup, Button, Slider, Box, Tooltip, Badge } from '@material-ui/core';
 import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Repeat, Refresh, Bookmarks, CloudDownload, CloudUpload, Settings } from '@material-ui/icons';
 
 export default function Player(props) {
   const dispatch = useDispatch();
   const song = useSelector(s => s.playlist.song);
+  const bookmark = useSelector(s => { return s.bookmark.bookmarks[s.playlist.list.id]; });
   const playback = useSelector(s => s.player);
   const repeat = useSelector(s => s.playlist.repeat) || false;
   const player = useRef();
@@ -48,7 +49,6 @@ export default function Player(props) {
     } else {
       player.current.pause();
     }
-    dispatch(saveBookmark(false));
   }, [playback.playing, song.url, dispatch]);
 
   useEffect(() => {
@@ -70,6 +70,13 @@ export default function Player(props) {
       player.current.volume = playback.volume;
   }
 
+  let timeMarks = [];
+  if (showBookmarks) {
+    if (bookmark.file === song.name) {
+      timeMarks.push( {value:bookmark.time, label:(<span style={{color: 'purple'}} title="bookmark"><Bookmarks/></span>)} );
+    }
+  }
+
   return (
     <div className="Player">
       <audio
@@ -79,11 +86,13 @@ export default function Player(props) {
         onEnded={() => dispatch(next())}
         onTimeUpdate={timeupdate}
         onLoadedMetadata={playerInit}
+        onPlay={() => dispatch(saveBookmark(false))}
+        onPause={() => dispatch(saveBookmark(false))}
       >
       </audio>
 
       <Box id="time-scale">
-        <Slider min={0} max={playback.duration} value={playback.currentTime} onChange={(e, value) => dispatch(setCurrentTime(value))} step={1} />
+        <Slider min={0} max={playback.duration} value={playback.currentTime} onChange={(e, value) => dispatch(setCurrentTime(value))} step={1} marks={timeMarks} />
       </Box>
       <ButtonGroup size="small" id="playback-controls">
         <Button onClick={() => dispatch(previous())}><SkipPrevious /></Button>
@@ -97,17 +106,25 @@ export default function Player(props) {
         <Button variant="outlined" size="small" onClick={() => { dispatch(fetchSource()); dispatch(loadBookmarks()) }}><Refresh /></Button>
         <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
         <Button className={'slider-small'}>
-          <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} title={volume} />
+          <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} />
         </Button>
-        <Button onClick={() => dispatch(toggleShowSpeed())} classes={{ root: showSpeed?"active":""}}><Speed /></Button>
+        <Button onClick={() => dispatch(toggleShowSpeed())} classes={{ root: showSpeed?"active":""}}>
+          <Badge id="speed-label" badgeContent={speed} overlap={"circular"} color={'primary'} invisible={speed === 1}>
+            <Speed />
+          </Badge>
+        </Button>
         {showSpeed &&
         <Button className={'slider-small'}>
-          <Slider min={0.5} max={2} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.1} title={speed} />
+          <Slider min={0.75} max={1.5} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.25} marks={true} />
         </Button>
         }
-        <Button onClick={() => dispatch(toggleShowBookmarks())} classes={{ root: showBookmarks?"active":""}} ><Bookmarks /></Button>
-        {showBookmarks && <Button onClick={() => dispatch(saveBookmark(true))}><CloudDownload /></Button>}
-        {showBookmarks && <Button onClick={() => dispatch(loadBookmark())}><CloudUpload /></Button>}
+        <Tooltip title={bookmark.file + ' ' +formatTime(bookmark.time)} >
+          <Button onClick={() => dispatch(toggleShowBookmarks())} classes={{ root: showBookmarks?"active":""}} >
+            <Bookmarks />
+          </Button>
+        </Tooltip>
+        {showBookmarks && <Button onClick={() => {dispatch(saveBookmark(true)); dispatch(toggleShowBookmarks());}}><CloudDownload /></Button>}
+        {showBookmarks && <Button onClick={() => {dispatch(loadBookmark()); dispatch(toggleShowBookmarks());}}><CloudUpload /></Button>}
         <Button onClick={() => dispatch(showSettings())} ><Settings /></Button>
       </ButtonGroup>
       <p id="title-display">{song.name}</p>
