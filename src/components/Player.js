@@ -71,7 +71,7 @@ export default function Player(props) {
   }
 
   let timeMarks = [];
-  if (showBookmarks) {
+  if (showBookmarks && bookmark) {
     if (bookmark.file === song.name) {
       timeMarks.push( {value:bookmark.time, label:(<span style={{color: 'purple'}} title="bookmark"><Bookmarks/></span>)} );
     }
@@ -118,7 +118,7 @@ export default function Player(props) {
           <Slider min={0.75} max={1.5} value={speed} onChange={(e, value) => dispatch(setSpeed(value))} step={0.25} marks={true} />
         </Button>
         }
-        <Tooltip title={bookmark.file + ' ' +formatTime(bookmark.time)} >
+        <Tooltip title={bookmark ? bookmark.file + ' ' +formatTime(bookmark.time) : ''}>
           <Button onClick={() => dispatch(toggleShowBookmarks())} classes={{ root: showBookmarks?"active":""}} >
             <Bookmarks />
           </Button>

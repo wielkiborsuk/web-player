@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
 import { play } from '../state/playerSlice';
-import { fetchSource } from '../state/sourcesSlice';
+import { fetchSource, fetchFiles } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable, useScrollable } from 'nice-scrollbars';
 import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@material-ui/core';
@@ -46,6 +46,9 @@ export default function MediaSource(props) {
       const foundList = sourcesLists.find(l => l.id === selectedListState.id);
       if (foundList) {
         dispatch(setCurrentList(foundList));
+        if (!foundList.files) {
+          dispatch(fetchFiles(foundList));
+        }
       }
     }
   }, [sourcesLists, dispatch, selectedListState.id]);
@@ -58,12 +61,9 @@ export default function MediaSource(props) {
     return selectedSong.url === song.url;
   }
 
-  const newSongCount = (list, bookmarks) => {
-    const mark = list.is_book ? bookmarks[list.id] : null;
-    if (mark) {
-      const idx = list.files.findIndex(s => s.name === mark.file);
-      return list.files.length - idx - 1;
-    }
+  const newSongCount = (list) => {
+    if (list && list.state && !list.state.finished)
+      return list.state.unread;
     return 0;
   }
 
@@ -77,17 +77,17 @@ export default function MediaSource(props) {
 
   const lists = sourcesLists || [];
   const list_items = lists.map(item =>
-    <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(setCurrentList(item))}>
+    <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => {dispatch(setCurrentList(item)); if (!item.files) { dispatch(fetchFiles(item));}}}>
       <ListItemText primary={item.name} />
       <ListItemSecondaryAction>
-        <Badge classes={{badge: 'badge-center'}} badgeContent={newSongCount(item, bookmarks)} color="primary">
+        <Badge classes={{badge: 'badge-center'}} badgeContent={newSongCount(item)} color="primary">
           &nbsp;
         </Badge>
       </ListItemSecondaryAction>
     </ListItem>);
   const show_songs = !!lists.find(list => list.id === selectedList.id);
-  const markIndex = (selectedList?.files?.length || 0) - 1 - newSongCount(selectedList, bookmarks);
-  const song_items = show_songs && selectedList.files && selectedListState.files.map((item, index) =>
+  const markIndex = (selectedList?.files?.length || 0) - 1 - newSongCount(selectedList);
+  const song_items = show_songs && selectedList.files && selectedList.files.map((item, index) =>
     <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item)); dispatch(play());}} >
       <Badge variant="dot" anchorOrigin={{vertical: 'top', horizontal: 'left'}} classes={{badge: 'dot-center'}} badgeContent={index-markIndex} invisible={index < markIndex} color={index > markIndex ? "primary" : "secondary"}>
         &nbsp;

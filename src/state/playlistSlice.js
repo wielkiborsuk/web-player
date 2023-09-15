@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { saveState, loadState } from './helpers';
+import { fetchFiles } from './sourcesSlice'
 
 const initialState = loadState('playlistState', {
   list: {},
@@ -48,6 +49,12 @@ const playlistSlice = createSlice({
     },
     toggleRepeat(state) {
       state.repeat = !state.repeat;
+      saveState('playlistState', state);
+    }
+  },
+  extraReducers: {
+    [fetchFiles.fulfilled]: (state, action) => {
+      state.list.files = action.payload.files;
       saveState('playlistState', state);
     }
   }

@@ -15,6 +15,16 @@ export const fetchSource = createAsyncThunk('sources/fetchSource', async (payloa
     .then(res => new Promise((resolve, _) => resolve({id: source.id, lists: res})));
 });
 
+export const fetchFiles = createAsyncThunk('sources/fetchFiles', async (payload, { getState }) => {
+  const source = getState().sources.sources[getState().sources.current];
+  const selectedList = getState().playlist.list;
+  if (source && selectedList) {
+    return fetch(source.base + selectedList.id + '/file')
+      .then(res => res.json())
+      .then(res => new Promise((resolve, _) => resolve({source_id: source.id, list_id: selectedList.id, files: res})));
+  }
+});
+
 export const saveConfig = createAsyncThunk('sources/saveConfig', async (payload, { getState }) => {
   const syncSource = getState().sources.syncSource;
   const syncKey = getState().sources.syncKey;
@@ -75,6 +85,12 @@ const sourcesSlice = createSlice({
     [fetchSource.fulfilled]: (state, action) => {
       const source = state.sources.find(s => s.id === action.payload.id);
       source.lists = action.payload.lists;
+      saveState('sourcesState', state);
+    },
+    [fetchFiles.fulfilled]: (state, action) => {
+      const source = state.sources.find(s => s.id === action.payload.source_id);
+      const selectedList = source.lists.find(l => l.id === action.payload.list_id);
+      selectedList.files = action.payload.files;
       saveState('sourcesState', state);
     },
     [loadConfig.fulfilled]: (state, action) => {
