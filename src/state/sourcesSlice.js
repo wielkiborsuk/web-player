@@ -6,7 +6,7 @@ const initialState = loadState('sourcesState', { sources: [
         {id: 2, name: 'lists', type: 'list', base: 'http://localhost:5000/list/'},
         {id: 3, name: 'books', type: 'book', base: 'http://localhost:5000/file/book/'},
         {id: 4, name: 'podcasts', type: 'book', base: 'http://localhost:5000/list/book/'},
-], syncSource: 'http://localhost:5000/', syncKey: 'config', current: 0, showSettings: false, unfinishedOnly: false });
+], syncSource: 'http://localhost:5000/', syncKey: 'config', current: 0, showSettings: false, unfinishedOnly: false, refreshing: false });
 
 export const fetchSource = createAsyncThunk('sources/fetchSource', async (payload, { getState }) => {
   const source = getState().sources.sources[getState().sources.current];
@@ -96,7 +96,11 @@ const sourcesSlice = createSlice({
     }
   },
   extraReducers: {
+    [fetchSource.pending]: (state, action) => {
+      state.refreshing = true;
+    },
     [fetchSource.fulfilled]: (state, action) => {
+      state.refreshing = false;
       const source = state.sources.find(s => s.id === action.payload.id);
       source.lastUpdated = new Date().toLocaleString();
       source.lists = action.payload.lists;

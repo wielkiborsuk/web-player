@@ -16,6 +16,7 @@ export default function Player(props) {
   const playback = useSelector(s => s.player);
   const repeat = useSelector(s => s.playlist.repeat) || false;
   const unfinishedOnly = useSelector(s => s.sources.unfinishedOnly) || false;
+  const refreshing = useSelector(s => s.sources.refreshing) || false;
   const player = useRef();
   const prevTime = useRef(0);
 
@@ -105,7 +106,7 @@ export default function Player(props) {
 
       <ButtonGroup size="small" id="meta-controls">
         <Button variant="outlined" size="small" onClick={() => dispatch(toggleFinished())} classes={{root: unfinishedOnly?"":"active"}}><DoneAll /></Button>
-        <Button variant="outlined" size="small" onClick={() => { dispatch(fetchSource()); dispatch(loadBookmarks()) }}><Refresh /></Button>
+        <Button variant="outlined" size="small" onClick={() => { dispatch(fetchSource()); dispatch(loadBookmarks()) }} classes={{root: refreshing?"active":""}}><Refresh  classes={{root: refreshing?"spin":""}} /></Button>
         <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
         <Button className={'slider-small'}>
           <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} />
