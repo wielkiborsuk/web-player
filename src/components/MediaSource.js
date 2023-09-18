@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
 import { play } from '../state/playerSlice';
-import { fetchSource, fetchFiles, refreshList } from '../state/sourcesSlice';
+import { fetchSource, fetchFiles } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable, useScrollable } from 'nice-scrollbars';
 import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@material-ui/core';
@@ -14,7 +14,6 @@ export default function MediaSource(props) {
   const selectedSong = useSelector(s => s.playlist.song);
   const sourcesLists = useSelector(s => s.sources.sources[props.index].lists);
   const currentSourceIndex = useSelector(s => s.sources.current);
-  const bookmarks = useSelector(s => s.bookmark.bookmarks);
   const unfinishedOnly = useSelector(s => s.sources.unfinishedOnly) || false;
 
   const selectedList = sourcesLists?.find(list => list.id === selectedListState.id) || selectedListState;
@@ -31,7 +30,7 @@ export default function MediaSource(props) {
         let song = selectedList.files.find((s) => s.url === selectedSong.url);
 
         if (!song) {
-          song = selectedList.files[bookmarkIndex(selectedList, bookmarks)];
+          song = selectedList.files[bookmarkIndex(selectedList)];
         }
 
         if (song) {
@@ -54,12 +53,6 @@ export default function MediaSource(props) {
     }
   }, [sourcesLists, dispatch, selectedListState.id]);
 
-  useEffect(() => {
-    if (bookmarks) {
-      dispatch(refreshList());
-    }
-  }, [bookmarks, dispatch, selectedList.id])
-
   const isListSelected = (list) => {
     return selectedList.id === list.id;
   }
@@ -74,10 +67,9 @@ export default function MediaSource(props) {
     return 0;
   }
 
-  const bookmarkIndex = (list, bookmarks) => {
-    const mark = list.is_book ? bookmarks[list.id] : null;
-    if (mark) {
-      return list.files.findIndex(s => s.name === mark.file);
+  const bookmarkIndex = (list) => {
+    if (list.is_book && list.bookmark && list.bookmark.filek) {
+      return list.files.findIndex(s => s.name === list.bookmark.file);
     }
     return -1;
   }

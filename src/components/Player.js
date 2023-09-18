@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks } from '../state/playerSlice';
-import { saveBookmark, loadBookmark, loadBookmarks } from '../state/bookmarkSlice';
+import { saveBookmark, loadBookmark } from '../state/bookmarkSlice';
 import { next, previous, shuffle, toggleRepeat } from '../state/playlistSlice';
 import { fetchSource, showSettings, toggleFinished } from '../state/sourcesSlice';
 import './Player.css';
@@ -12,7 +12,7 @@ import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, S
 export default function Player(props) {
   const dispatch = useDispatch();
   const song = useSelector(s => s.playlist.song);
-  const bookmark = useSelector(s => { return s.bookmark.bookmarks[s.playlist.list.id]; });
+  const bookmark = useSelector(s => s.playlist.list.bookmark) || {};
   const playback = useSelector(s => s.player);
   const repeat = useSelector(s => s.playlist.repeat) || false;
   const unfinishedOnly = useSelector(s => s.sources.unfinishedOnly) || false;
@@ -106,7 +106,7 @@ export default function Player(props) {
 
       <ButtonGroup size="small" id="meta-controls">
         <Button variant="outlined" size="small" onClick={() => dispatch(toggleFinished())} classes={{root: unfinishedOnly?"":"active"}}><DoneAll /></Button>
-        <Button variant="outlined" size="small" onClick={() => { dispatch(fetchSource()); dispatch(loadBookmarks()) }} classes={{root: refreshing?"active":""}}><Refresh  classes={{root: refreshing?"spin":""}} /></Button>
+        <Button variant="outlined" size="small" onClick={() => dispatch(fetchSource())} classes={{root: refreshing?"active":""}}><Refresh  classes={{root: refreshing?"spin":""}} /></Button>
         <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
         <Button className={'slider-small'}>
           <Slider min={0} max={1} value={volume} onChange={(e, value) => dispatch(setVolume(value))} step={0.1} />

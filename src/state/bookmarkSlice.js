@@ -2,9 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { setCurrentSong } from './playlistSlice';
 import { play, setCurrentTime } from './playerSlice';
 import { loadState, saveState } from './helpers';
+import { refreshList } from './sourcesSlice';
 
 const initialState = loadState('bookmarkState', {
-  bookmarks: [],
   bookmarkAlertOpen: false,
   bookmarkAlertMessage: 'Newer bookmark exists'
 });
@@ -41,7 +41,7 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
     }).catch((error) => {
       console.error('couldnt save bookmark');
     }).finally(() => {
-      dispatch(loadBookmarks());
+      dispatch(refreshList());
     });
   }
 });
@@ -62,21 +62,6 @@ export const loadBookmark = createAsyncThunk('player/loadBookmark', async (paylo
   }
 });
 
-export const loadBookmarks = createAsyncThunk('player/loadBookmarks', async (payload, { dispatch, getState }) => {
-  const syncSource = getState().sources.syncSource || '';
-  if (syncSource) {
-    fetch(syncSource + 'bookmark/').then(res => res.json()).then(body => {
-      const bookmarkMap = body.reduce((map, mark) => {
-        map[mark.id] = mark;
-        return map;
-      }, {});
-      dispatch(setBookmarks(bookmarkMap));
-    }).catch((error) => {
-      console.error('couldnt load the bookmark list');
-    });
-  }
-});
-
 const bookmarkSlice = createSlice({
   name: 'bookmark',
   initialState,
@@ -88,13 +73,9 @@ const bookmarkSlice = createSlice({
     setBookmarkAlertOpen(state, action) {
       state.bookmarkAlertOpen = action.payload;
       saveState('bookmarkState', state);
-    },
-    setBookmarks(state, action) {
-      state.bookmarks = action.payload;
-      saveState('bookmarkState', state);
     }
   }
 });
 
-export const { setBookmarkAlertMessage, setBookmarkAlertOpen, setBookmarks } = bookmarkSlice.actions;
+export const { setBookmarkAlertMessage, setBookmarkAlertOpen } = bookmarkSlice.actions;
 export default bookmarkSlice.reducer;
