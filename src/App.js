@@ -16,7 +16,7 @@ export default function App() {
   const bookmarkAlertOpen = useSelector(s => s.bookmark.bookmarkAlertOpen);
   const bookmarkAlertMessage = useSelector(s => s.bookmark.bookmarkAlertMessage);
 
-  const tabs = sources.map((s) => <Tab key={s.id} label={s.name} />);
+  const tabs = sources.map((s) => <Tab key={s.id} label={s.name} title={s.lastUpdated} />);
   const contents = sources.map((s, i) => <MediaSource key={s.id} index={i} />);
 
   const theme = createTheme({

@@ -98,6 +98,7 @@ const sourcesSlice = createSlice({
   extraReducers: {
     [fetchSource.fulfilled]: (state, action) => {
       const source = state.sources.find(s => s.id === action.payload.id);
+      source.lastUpdated = new Date().toLocaleString();
       source.lists = action.payload.lists;
       saveState('sourcesState', state);
     },
