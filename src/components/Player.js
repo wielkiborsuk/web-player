@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import { play, pause, setVolume, setSpeed, setMuted, setDuration, setCurrentTime, toggleShowSpeed, toggleShowBookmarks } from '../state/playerSlice';
 import { saveBookmark, loadBookmark, loadBookmarks } from '../state/bookmarkSlice';
 import { next, previous, shuffle, toggleRepeat } from '../state/playlistSlice';
-import { fetchSource, showSettings } from '../state/sourcesSlice';
+import { fetchSource, showSettings, toggleFinished } from '../state/sourcesSlice';
 import './Player.css';
 import { formatTime } from './helpers';
 import { ButtonGroup, Button, Slider, Box, Tooltip, Badge } from '@material-ui/core';
-import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Repeat, Refresh, Bookmarks, CloudDownload, CloudUpload, Settings } from '@material-ui/icons';
+import { SkipNext, SkipPrevious, PlayArrow, Pause, Speed, VolumeOff, VolumeUp, Shuffle, Repeat, Refresh, Bookmarks, CloudDownload, CloudUpload, Settings, DoneAll } from '@material-ui/icons';
 
 export default function Player(props) {
   const dispatch = useDispatch();
@@ -15,6 +15,7 @@ export default function Player(props) {
   const bookmark = useSelector(s => { return s.bookmark.bookmarks[s.playlist.list.id]; });
   const playback = useSelector(s => s.player);
   const repeat = useSelector(s => s.playlist.repeat) || false;
+  const unfinishedOnly = useSelector(s => s.sources.unfinishedOnly) || false;
   const player = useRef();
   const prevTime = useRef(0);
 
@@ -103,6 +104,7 @@ export default function Player(props) {
       </ButtonGroup>
 
       <ButtonGroup size="small" id="meta-controls">
+        <Button variant="outlined" size="small" onClick={() => dispatch(toggleFinished())} classes={{root: unfinishedOnly?"":"active"}}><DoneAll /></Button>
         <Button variant="outlined" size="small" onClick={() => { dispatch(fetchSource()); dispatch(loadBookmarks()) }}><Refresh /></Button>
         <Button variant="outlined" size="small" onClick={() => dispatch(setMuted(!playback.muted))}>{muteIcon}</Button>
         <Button className={'slider-small'}>

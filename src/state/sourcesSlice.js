@@ -6,7 +6,7 @@ const initialState = loadState('sourcesState', { sources: [
         {id: 2, name: 'lists', type: 'list', base: 'http://localhost:5000/list/'},
         {id: 3, name: 'books', type: 'book', base: 'http://localhost:5000/file/book/'},
         {id: 4, name: 'podcasts', type: 'book', base: 'http://localhost:5000/list/book/'},
-], syncSource: 'http://localhost:5000/', syncKey: 'config', current: 0, showSettings: false });
+], syncSource: 'http://localhost:5000/', syncKey: 'config', current: 0, showSettings: false, unfinishedOnly: false });
 
 export const fetchSource = createAsyncThunk('sources/fetchSource', async (payload, { getState }) => {
   const source = getState().sources.sources[getState().sources.current];
@@ -79,6 +79,10 @@ const sourcesSlice = createSlice({
     hideSettings(state) {
       state.showSettings = false;
       saveState('sourcesState', state);
+    },
+    toggleFinished(state) {
+      state.unfinishedOnly = !state.unfinishedOnly;
+      saveState('sourcesState', state);
     }
   },
   extraReducers: {
@@ -101,5 +105,5 @@ const sourcesSlice = createSlice({
   }
 });
 
-export const { setCurrent, setSourceLists, setSources, setSyncSource, setSyncKey, showSettings, hideSettings } = sourcesSlice.actions;
+export const { setCurrent, setSourceLists, setSources, setSyncSource, setSyncKey, showSettings, hideSettings, toggleFinished } = sourcesSlice.actions;
 export default sourcesSlice.reducer;

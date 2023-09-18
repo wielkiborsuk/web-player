@@ -15,6 +15,7 @@ export default function MediaSource(props) {
   const sourcesLists = useSelector(s => s.sources.sources[props.index].lists);
   const currentSourceIndex = useSelector(s => s.sources.current);
   const bookmarks = useSelector(s => s.bookmark.bookmarks);
+  const unfinishedOnly = useSelector(s => s.sources.unfinishedOnly) || false;
 
   const selectedList = sourcesLists?.find(list => list.id === selectedListState.id) || selectedListState;
 
@@ -77,6 +78,7 @@ export default function MediaSource(props) {
 
   const lists = sourcesLists || [];
   const list_items = lists.map(item =>
+    (!unfinishedOnly || !item.state.finished || isListSelected(item)) &&
     <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => {dispatch(setCurrentList(item)); if (!item.files) { dispatch(fetchFiles(item));}}}>
       <ListItemText primary={item.name} />
       <ListItemSecondaryAction>
