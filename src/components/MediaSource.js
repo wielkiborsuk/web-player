@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
 import { play } from '../state/playerSlice';
-import { fetchSource, fetchFiles } from '../state/sourcesSlice';
+import { fetchSource, fetchFiles, refreshList } from '../state/sourcesSlice';
 import './MediaSource.css';
 import { Scrollable, useScrollable } from 'nice-scrollbars';
 import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@material-ui/core';
@@ -53,6 +53,12 @@ export default function MediaSource(props) {
       }
     }
   }, [sourcesLists, dispatch, selectedListState.id]);
+
+  useEffect(() => {
+    if (bookmarks) {
+      dispatch(refreshList());
+    }
+  }, [bookmarks, dispatch, selectedList.id])
 
   const isListSelected = (list) => {
     return selectedList.id === list.id;
