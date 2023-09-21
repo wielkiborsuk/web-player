@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { setCurrentSong } from './playlistSlice';
+import { songSelected } from './playlistSlice';
 import { play, setCurrentTime } from './playerSlice';
 import { loadState, saveState } from './helpers';
 import { refreshList } from './sourcesSlice';
@@ -21,7 +21,7 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
     time: time
   }
   //send bookmark to API
-  if (syncSource && list.files.find(s => s.name === song.name)) {
+  if (syncSource && list.is_book && list.files.find(s => s.name === song.name)) {
     const bookmarkUrl = syncSource + 'bookmark/' + (overwrite ? '?overwrite=true' : '')
     fetch(bookmarkUrl, {
       method: 'post',
@@ -41,7 +41,7 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
     }).catch((error) => {
       console.error('couldnt save bookmark');
     }).finally(() => {
-      dispatch(refreshList());
+      dispatch(refreshList(list.id));
     });
   }
 });
@@ -50,10 +50,10 @@ export const loadBookmark = createAsyncThunk('player/loadBookmark', async (paylo
   const list = getState().playlist.list;
   const syncSource = getState().sources.syncSource || '';
   //send bookmark to API
-  if (syncSource) {
+  if (syncSource && list && list.is_book) {
     fetch(syncSource + 'bookmark/' + list.id).then(res => res.json()).then(body => {
       const song = list.files.find(s => s.name === body.file);
-      dispatch(setCurrentSong(song));
+      dispatch(songSelected({song: song, list: list}));
       dispatch(setCurrentTime(body.time));
       dispatch(play());
     }).catch((error) => {

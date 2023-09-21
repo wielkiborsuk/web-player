@@ -15,23 +15,21 @@ export const fetchSource = createAsyncThunk('sources/fetchSource', async (payloa
     .then(res => new Promise((resolve, _) => resolve({id: source.id, lists: res})));
 });
 
-export const fetchFiles = createAsyncThunk('sources/fetchFiles', async (payload, { getState }) => {
+export const refreshList = createAsyncThunk('sources/refreshList', async (payload, { getState }) => {
   const source = getState().sources.sources[getState().sources.current];
-  const selectedList = getState().playlist.list;
-  if (source && selectedList) {
-    return fetch(source.base + selectedList.id + '/file')
+  if (source) {
+    return fetch(source.base + payload)
       .then(res => res.json())
-      .then(res => new Promise((resolve, _) => resolve({source_id: source.id, list_id: selectedList.id, files: res})));
+      .then(res => new Promise((resolve, _) => resolve({source_id: source.id, list: res})));
   }
 });
 
-export const refreshList = createAsyncThunk('sources/refreshList', async (payload, { getState }) => {
+export const listSelected = createAsyncThunk('sources/listSelected', async (payload, { getState }) => {
   const source = getState().sources.sources[getState().sources.current];
-  const selectedList = getState().playlist.list;
-  if (source && selectedList) {
-    return fetch(source.base + selectedList.id)
+  if (source && !payload.files) {
+    return fetch(source.base + payload.id + '/file')
       .then(res => res.json())
-      .then(res => new Promise((resolve, _) => resolve({source_id: source.id, list: res})));
+      .then(res => new Promise((resolve, _) => resolve({source_id: source.id, list_id: payload.id, files: res})));
   }
 });
 
@@ -106,11 +104,17 @@ const sourcesSlice = createSlice({
       source.lists = action.payload.lists;
       saveState('sourcesState', state);
     },
-    [fetchFiles.fulfilled]: (state, action) => {
-      const source = state.sources.find(s => s.id === action.payload.source_id);
-      const selectedList = source.lists.find(l => l.id === action.payload.list_id);
-      selectedList.files = action.payload.files;
-      saveState('sourcesState', state);
+    [listSelected.pending]: (state, action) => {
+      const source = state.sources[state.current];
+      source.selectedList = action.meta.arg.id;
+    },
+    [listSelected.fulfilled]: (state, action) => {
+      if (action.payload) {
+        const source = state.sources.find(s => s.id === action.payload.source_id);
+        const selectedList = source.lists.find(l => l.id === action.payload.list_id);
+        selectedList.files = action.payload.files;
+        saveState('sourcesState', state);
+      }
     },
     [refreshList.fulfilled]: (state, action) => {
       const source = state.sources.find(s => s.id === action.payload.source_id);
