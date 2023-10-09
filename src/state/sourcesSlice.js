@@ -64,10 +64,6 @@ const sourcesSlice = createSlice({
       state.current = action.payload;
       saveState('sourcesState', state);
     },
-    setSourceLists(state, action) {
-      state.sources.find(source => source.base === action.payload.base).lists = action.payload.lists;
-      saveState('sourcesState', state);
-    },
     setSources(state, action) {
       state.sources = action.payload;
       saveState('sourcesState', state);
@@ -132,5 +128,5 @@ const sourcesSlice = createSlice({
   }
 });
 
-export const { setCurrent, setSourceLists, setSources, setSyncSource, setSyncKey, showSettings, hideSettings, toggleFinished } = sourcesSlice.actions;
+export const { setCurrent, setSources, setSyncSource, setSyncKey, showSettings, hideSettings, toggleFinished } = sourcesSlice.actions;
 export default sourcesSlice.reducer;
