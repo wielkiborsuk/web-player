@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { songSelected } from './playlistSlice';
 import { play, setCurrentTime } from './playerSlice';
 import { loadState, saveState } from './helpers';
-import { refreshList } from './sourcesSlice';
+import { listSelected, refreshList } from './sourcesSlice';
 
 const initialState = loadState('bookmarkState', {
   bookmarkAlertOpen: false,
@@ -41,24 +41,50 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
     }).catch((error) => {
       console.error('couldnt save bookmark');
     }).finally(() => {
-      dispatch(refreshList(list.id));
+      dispatch(refreshList(list));
     });
   }
 });
 
 export const loadBookmark = createAsyncThunk('player/loadBookmark', async (payload, { dispatch, getState }) => {
-  const list = getState().playlist.list;
+  const list = payload || getState().playlist.list;
   const syncSource = getState().sources.syncSource || '';
-  //send bookmark to API
-  if (syncSource && list && list.is_book) {
+  let limit = 3;
+
+  function findSelectedList() {
+    const source = getState().sources.sources.find(it => it.id === list.source_id);
+    const selectedList = source.lists.find((it) => it.id === source.selectedList);
+    return selectedList;
+  }
+
+  function callback() {
+    const list = findSelectedList();
     fetch(syncSource + 'bookmark/' + list.id).then(res => res.json()).then(body => {
       const song = list.files.find(s => s.name === body.file);
       dispatch(songSelected({song: song, list: list}));
       dispatch(setCurrentTime(body.time));
       dispatch(play());
     }).catch((error) => {
+      console.log(error);
       console.error('couldnt load the bookmark');
     });
+  }
+
+  function wait() {
+    const selectedList = findSelectedList();
+    if (selectedList.id === list.id && selectedList.files) {
+      callback();
+    } else if(limit > 0) {
+      setTimeout(wait, 500);
+      limit--;
+    } else {
+      console.log('could not load the bookmark - retry limit reached');
+    }
+  }
+
+  if (syncSource && list && list.is_book) {
+      dispatch(listSelected(list));
+      wait();
   }
 });
 

@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { songSelected } from '../state/playlistSlice';
 import { play } from '../state/playerSlice';
 import { fetchSource, listSelected } from '../state/sourcesSlice';
+import { loadBookmark } from '../state/bookmarkSlice';
+
 import './MediaSource.css';
 import { Scrollable, useScrollable } from 'nice-scrollbars';
 import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@material-ui/core';
@@ -73,7 +75,7 @@ export default function MediaSource(props) {
     <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(listSelected(item))}>
       <ListItemText primary={item.name} />
       <ListItemSecondaryAction>
-        <Badge classes={{badge: 'badge-center'}} badgeContent={newSongCount(item)} color="primary">
+        <Badge classes={{badge: 'badge-center'}} badgeContent={newSongCount(item)} color="primary" onClick={() => dispatch(loadBookmark(item))}>
           &nbsp;
         </Badge>
       </ListItemSecondaryAction>

@@ -16,20 +16,16 @@ export const fetchSource = createAsyncThunk('sources/fetchSource', async (payloa
 });
 
 export const refreshList = createAsyncThunk('sources/refreshList', async (payload, { getState }) => {
-  const source = getState().sources.sources[getState().sources.current];
-  if (source) {
-    return fetch(source.base + payload)
-      .then(res => res.json())
-      .then(res => new Promise((resolve, _) => resolve({source_id: source.id, list: res})));
-  }
+  return fetch(payload.base_url)
+    .then(res => res.json())
+    .then(res => new Promise((resolve, _) => resolve({source_id: payload.source_id, list: res})));
 });
 
 export const listSelected = createAsyncThunk('sources/listSelected', async (payload, { getState }) => {
-  const source = getState().sources.sources[getState().sources.current];
-  if (source && !payload.files) {
-    return fetch(source.base + payload.id + '/file')
+  if (!payload.files) {
+    return fetch(payload.base_url + '/file')
       .then(res => res.json())
-      .then(res => new Promise((resolve, _) => resolve({source_id: source.id, list_id: payload.id, files: res})));
+      .then(res => new Promise((resolve, _) => resolve({source_id: payload.source_id, list_id: payload.id, files: res})));
   }
 });
 
@@ -98,10 +94,14 @@ const sourcesSlice = createSlice({
       const source = state.sources.find(s => s.id === action.payload.id);
       source.lastUpdated = new Date().toLocaleString();
       source.lists = action.payload.lists;
+      source.lists.forEach(list => {
+        list.source_id = source.id;
+        list.base_url = source.base + list.id;
+      });
       saveState('sourcesState', state);
     },
     [listSelected.pending]: (state, action) => {
-      const source = state.sources[state.current];
+      const source = state.sources.find(s => s.id === action.meta.arg.source_id);
       source.selectedList = action.meta.arg.id;
     },
     [listSelected.fulfilled]: (state, action) => {
