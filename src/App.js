@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import { useSelector, useDispatch } from 'react-redux';
 import Player from './components/Player.js';
@@ -18,6 +18,27 @@ export default function App() {
 
   const tabs = sources.map((s) => <Tab key={s.id} label={s.name} title={s.lastUpdated} />);
   const contents = sources.map((s, i) => <MediaSource key={s.id} index={i} />);
+
+  function callRefresh(sources) {
+    sources.forEach(s => {
+      if (s.type === 'file') {
+        fetch(s.base + 'scan').then(res => res.json());
+      }
+      if (s.type === 'book' && !s.base.includes('file')) {
+        fetch(s.base + 'refresh').then(res => res.json());
+      }
+    });
+
+  }
+
+  useEffect(() => {
+    callRefresh(sources);
+    let handle = setInterval(callRefresh, 3600 * 1000, sources);
+
+    return () => {
+      clearInterval(handle);
+    }
+  }, [sources]);
 
   const theme = createTheme({
     palette: {
