@@ -38,7 +38,8 @@ export default function App() {
     return () => {
       clearInterval(handle);
     }
-  }, [sources]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const theme = createTheme({
     palette: {
