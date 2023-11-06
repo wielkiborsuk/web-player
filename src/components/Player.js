@@ -78,6 +78,11 @@ export default function Player(props) {
       timeMarks.push( {value:bookmark.time, label:(<span style={{color: 'purple'}} title="bookmark"><Bookmarks/></span>)} );
     }
   }
+  if (showBookmarks && song.chapters && song.chapters.length > 0) {
+    song.chapters.forEach((chapter) => {
+      timeMarks.push( {value:chapter.start_time, label:(<span title={chapter.title}><Bookmarks/></span>)} );
+    });
+  }
 
   return (
     <div className="Player">
