@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { saveState, loadState } from './helpers';
+import { listSelected, refreshList } from './sourcesSlice'
 
 const initialState = loadState('playlistState', {
   list: {},
@@ -15,12 +16,9 @@ const playlistSlice = createSlice({
   name: 'playlist',
   initialState,
   reducers: {
-    setCurrentList(state, action) {
-      state.list = action.payload;
-      saveState('playlistState', state);
-    },
-    setCurrentSong(state, action) {
-      state.song = action.payload;
+    songSelected(state, action) {
+      state.song = action.payload.song;
+      state.list = action.payload.list;
       saveState('playlistState', state);
       document.title = state.song.name;
     },
@@ -50,8 +48,22 @@ const playlistSlice = createSlice({
       state.repeat = !state.repeat;
       saveState('playlistState', state);
     }
+  },
+  extraReducers: {
+    [listSelected.fulfilled]: (state, action) => {
+      if (action.payload && state.list && state.list.id === action.payload.list_id) {
+        state.list.files = action.payload.files;
+        saveState('playlistState', state);
+      }
+    },
+    [refreshList.fulfilled]: (state, action) => {
+      if (state.list && action.payload && action.payload.list && state.list.id === action.payload.list.id) {
+        Object.assign(state.list, action.payload.list);
+        saveState('playlistState', state);
+      }
+    }
   }
 });
 
-export const { setCurrentSong, setCurrentList, next, previous, shuffle, toggleRepeat } = playlistSlice.actions;
+export const { songSelected, next, previous, shuffle, toggleRepeat } = playlistSlice.actions;
 export default playlistSlice.reducer;

@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { setCurrentSong } from './playlistSlice';
+import { songSelected } from './playlistSlice';
 import { play, setCurrentTime } from './playerSlice';
 import { loadState, saveState } from './helpers';
+import { listSelected, refreshList } from './sourcesSlice';
 
 const initialState = loadState('bookmarkState', {
-  bookmarks: [],
   bookmarkAlertOpen: false,
   bookmarkAlertMessage: 'Newer bookmark exists'
 });
@@ -21,7 +21,7 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
     time: time
   }
   //send bookmark to API
-  if (syncSource && list.files.find(s => s.name === song.name)) {
+  if (syncSource && list.is_book && list.files.find(s => s.name === song.name)) {
     const bookmarkUrl = syncSource + 'bookmark/' + (overwrite ? '?overwrite=true' : '')
     fetch(bookmarkUrl, {
       method: 'post',
@@ -41,39 +41,50 @@ export const saveBookmark = createAsyncThunk('player/saveBookmark', async (overw
     }).catch((error) => {
       console.error('couldnt save bookmark');
     }).finally(() => {
-      dispatch(loadBookmarks());
+      dispatch(refreshList(list));
     });
   }
 });
 
 export const loadBookmark = createAsyncThunk('player/loadBookmark', async (payload, { dispatch, getState }) => {
-  const list = getState().playlist.list;
+  const list = payload || getState().playlist.list;
   const syncSource = getState().sources.syncSource || '';
-  //send bookmark to API
-  if (syncSource) {
+  let limit = 3;
+
+  function findSelectedList() {
+    const source = getState().sources.sources.find(it => it.id === list.source_id);
+    const selectedList = source.lists.find((it) => it.id === source.selectedList);
+    return selectedList;
+  }
+
+  function callback() {
+    const list = findSelectedList();
     fetch(syncSource + 'bookmark/' + list.id).then(res => res.json()).then(body => {
       const song = list.files.find(s => s.name === body.file);
-      dispatch(setCurrentSong(song));
+      dispatch(songSelected({song: song, list: list}));
       dispatch(setCurrentTime(body.time));
       dispatch(play());
     }).catch((error) => {
+      console.log(error);
       console.error('couldnt load the bookmark');
     });
   }
-});
 
-export const loadBookmarks = createAsyncThunk('player/loadBookmarks', async (payload, { dispatch, getState }) => {
-  const syncSource = getState().sources.syncSource || '';
-  if (syncSource) {
-    fetch(syncSource + 'bookmark/').then(res => res.json()).then(body => {
-      const bookmarkMap = body.reduce((map, mark) => {
-        map[mark.id] = mark;
-        return map;
-      }, {});
-      dispatch(setBookmarks(bookmarkMap));
-    }).catch((error) => {
-      console.error('couldnt load the bookmark list');
-    });
+  function wait() {
+    const selectedList = findSelectedList();
+    if (selectedList.id === list.id && selectedList.files) {
+      callback();
+    } else if(limit > 0) {
+      setTimeout(wait, 500);
+      limit--;
+    } else {
+      console.log('could not load the bookmark - retry limit reached');
+    }
+  }
+
+  if (syncSource && list && list.is_book) {
+      dispatch(listSelected(list));
+      wait();
   }
 });
 
@@ -88,13 +99,9 @@ const bookmarkSlice = createSlice({
     setBookmarkAlertOpen(state, action) {
       state.bookmarkAlertOpen = action.payload;
       saveState('bookmarkState', state);
-    },
-    setBookmarks(state, action) {
-      state.bookmarks = action.payload;
-      saveState('bookmarkState', state);
     }
   }
 });
 
-export const { setBookmarkAlertMessage, setBookmarkAlertOpen, setBookmarks } = bookmarkSlice.actions;
+export const { setBookmarkAlertMessage, setBookmarkAlertOpen } = bookmarkSlice.actions;
 export default bookmarkSlice.reducer;

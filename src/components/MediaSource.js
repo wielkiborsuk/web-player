@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setCurrentSong, setCurrentList } from '../state/playlistSlice';
+import { songSelected } from '../state/playlistSlice';
 import { play } from '../state/playerSlice';
-import { fetchSource } from '../state/sourcesSlice';
+import { fetchSource, listSelected } from '../state/sourcesSlice';
+import { loadBookmark } from '../state/bookmarkSlice';
+
 import './MediaSource.css';
 import { Scrollable, useScrollable } from 'nice-scrollbars';
 import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@material-ui/core';
@@ -10,18 +12,17 @@ import { List, ListItem, ListItemText, ListItemSecondaryAction, Badge } from '@m
 
 export default function MediaSource(props) {
   const dispatch = useDispatch();
-  const selectedListState = useSelector(s => s.playlist.list);
   const selectedSong = useSelector(s => s.playlist.song);
-  const sourcesLists = useSelector(s => s.sources.sources[props.index].lists);
+  const source = useSelector(s => s.sources.sources[props.index]);
   const currentSourceIndex = useSelector(s => s.sources.current);
-  const bookmarks = useSelector(s => s.bookmark.bookmarks);
+  const unfinishedOnly = useSelector(s => s.sources.unfinishedOnly) || false;
 
-  const selectedList = sourcesLists?.find(list => list.id === selectedListState.id) || selectedListState;
+  const selectedList = source.lists?.find(list => list.id === source.selectedList);
 
   const songsScroll = useScrollable();
 
   useEffect(() => {
-    if (props.index === currentSourceIndex && !sourcesLists) {
+    if (props.index === currentSourceIndex && !source.lists) {
       dispatch(fetchSource());
     }
 
@@ -30,7 +31,7 @@ export default function MediaSource(props) {
         let song = selectedList.files.find((s) => s.url === selectedSong.url);
 
         if (!song) {
-          song = selectedList.files[bookmarkIndex(selectedList, bookmarks)];
+          song = selectedList.files[bookmarkIndex(selectedList)];
         }
 
         if (song) {
@@ -42,54 +43,47 @@ export default function MediaSource(props) {
   });
 
   useEffect(() => {
-    if (selectedListState.id && sourcesLists) {
-      const foundList = sourcesLists.find(l => l.id === selectedListState.id);
-      if (foundList) {
-        dispatch(setCurrentList(foundList));
-      }
+    if (selectedList && !selectedList.files) {
+      dispatch(listSelected(selectedList));
     }
-  }, [sourcesLists, dispatch, selectedListState.id]);
+  }, [selectedList, dispatch]);
 
   const isListSelected = (list) => {
-    return selectedList.id === list.id;
+    return list && source.selectedList === list.id;
   }
 
   const isSongSelected = (song) => {
     return selectedSong.url === song.url;
   }
 
-  const newSongCount = (list, bookmarks) => {
-    const mark = list.is_book ? bookmarks[list.id] : null;
-    if (mark) {
-      const idx = list.files.findIndex(s => s.name === mark.file);
-      return list.files.length - idx - 1;
-    }
+  const newSongCount = (list) => {
+    if (list && list.is_book && list.state && !list.state.finished)
+      return list.state.unread;
     return 0;
   }
 
-  const bookmarkIndex = (list, bookmarks) => {
-    const mark = list.is_book ? bookmarks[list.id] : null;
-    if (mark) {
-      return list.files.findIndex(s => s.name === mark.file);
+  const bookmarkIndex = (list) => {
+    if (list && list.is_book && list.files && list.bookmark && list.bookmark.file) {
+      return list.files.findIndex(s => s.name === list.bookmark.file);
     }
     return -1;
   }
 
-  const lists = sourcesLists || [];
+  const lists = source.lists || [];
   const list_items = lists.map(item =>
-    <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(setCurrentList(item))}>
+    (!item.is_book || !unfinishedOnly || !item.state.finished || isListSelected(item)) &&
+    <ListItem button dense={true} key={item.id} selected={isListSelected(item)} onClick={() => dispatch(listSelected(item))}>
       <ListItemText primary={item.name} />
       <ListItemSecondaryAction>
-        <Badge classes={{badge: 'badge-center'}} badgeContent={newSongCount(item, bookmarks)} color="primary">
+        <Badge classes={{badge: 'badge-center'}} badgeContent={newSongCount(item)} color="primary" onClick={() => dispatch(loadBookmark(item))}>
           &nbsp;
         </Badge>
       </ListItemSecondaryAction>
     </ListItem>);
-  const show_songs = !!lists.find(list => list.id === selectedList.id);
-  const markIndex = (selectedList?.files?.length || 0) - 1 - newSongCount(selectedList, bookmarks);
-  const song_items = show_songs && selectedList.files && selectedListState.files.map((item, index) =>
-    <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(setCurrentSong(item)); dispatch(play());}} >
-      <Badge variant="dot" anchorOrigin={{vertical: 'top', horizontal: 'left'}} classes={{badge: 'dot-center'}} badgeContent={index-markIndex} invisible={index < markIndex} color={index > markIndex ? "primary" : "secondary"}>
+  const markIndex = bookmarkIndex(selectedList);
+  const song_items = isListSelected(selectedList) && selectedList.files && selectedList.files.map((item, index) =>
+    <ListItem button dense={true} id={item.url} key={item.url} selected={isSongSelected(item)} onClick={() => {dispatch(songSelected({song: item, list: selectedList})); dispatch(play());}} >
+      <Badge variant="dot" anchorOrigin={{vertical: 'top', horizontal: 'left'}} classes={{badge: 'dot-center'}} badgeContent={index-markIndex} invisible={!selectedList.is_book || (index < markIndex)} color={index > markIndex ? "primary" : "secondary"}>
         &nbsp;
       </Badge>
       <ListItemText primary={item.name} />
