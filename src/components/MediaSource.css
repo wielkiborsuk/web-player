@@ -5,6 +5,7 @@
 
 span.badge-center {
   transform: scale(1) translate(+30%, 0%);
+  cursor: e-resize;
 }
 
 span.dot-center {
